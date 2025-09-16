@@ -42,6 +42,20 @@ class _RegisterState extends State<Register> {
       });
       return;
     }
+    // try{
+    //   final result = await AuthenticationAPI.registerUser(
+    //     email: email,
+    //     password: password,
+    //     name: name,
+    //   );
+    //   setState(() {
+    //     User = result;
+    //   });
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //      SnackBar(content: Text("Pendaftaran berhasil! Silakan login.")),
+    //   );
+    //   print(User?.toJson());
+    // }
 
     setState(() {
       isLoading = false;
@@ -87,22 +101,6 @@ class _RegisterState extends State<Register> {
                 child: TextFormField(
                   controller: emailController,
                   decoration: _inputDecoration("Masukkan email anda"),
-                  // validator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return "Email tidak boleh kosong";
-                  //   }
-                  //   if (!value.contains("@")) {
-                  //     return "Email tidak valid";
-                  //   }
-                  //   if (!(value.endsWith("@gmail.com") ||
-                  //       value.endsWith("@yahoo.com"))) {
-                  //     return "Email harus @gmail.com atau @yahoo.com";
-                  //   }
-                  //   if (RegExp('[A-Z]').hasMatch(value)) {
-                  //     return "Email harus huruf kecil";
-                  //   }
-                  //   return null;
-                  // },
                 ),
               ),
               const SizedBox(height: 20),
@@ -231,19 +229,7 @@ class _RegisterState extends State<Register> {
                   return null;
                 },
               ),
-              // Lupa Password
-              // Align(
-              //   alignment: Alignment.centerLeft,
-              //   child: TextButton(
-              //     onPressed: () {
-              //       // TODO: Arahkan ke halaman lupa password
-              //     },
-              //     child: const Text(
-              //       "Lupa Password?",
-              //       style: TextStyle(color: Colors.grey),
-              //     ),
-              //   ),
-              // ),
+
               const SizedBox(height: 24),
 
               // Tombol Daftar
@@ -274,29 +260,6 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Sudah punya akun
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [
-              //     const Text(
-              //       "Belum Punya Akun? ",
-              //       style: TextStyle(color: Colors.black54),
-              //     ),
-              //     GestureDetector(
-              //       onTap: () {
-              //         Navigator.pop(context);
-              //       },
-              //       child: const Text(
-              //         "Daftar",
-              //         style: TextStyle(
-              //           color: Colors.black,
-              //           fontWeight: FontWeight.bold,
-              //         ),
-              //       ),
-              //     ),
-              //   ],
-              // ),
             ],
           ),
         ),
