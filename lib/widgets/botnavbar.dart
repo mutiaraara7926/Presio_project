@@ -16,7 +16,7 @@ class _BotnavbarState extends State<Botnavbar> {
   static const List<Widget> widgetOptions = <Widget>[
     HomePage(),
     HistoryPage(),
-    Profille(),
+    ProfilePage(),
   ];
   @override
   Widget build(BuildContext context) {

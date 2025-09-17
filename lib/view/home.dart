@@ -1,4 +1,7 @@
+import 'package:absensi/view/google_map.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:slide_to_act/slide_to_act.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -53,14 +56,6 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.white,
                       ),
                     ),
-                    // Container(
-                    //   width: 40,
-                    //   height: 40,
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.orange,
-                    //     shape: BoxShape.circle,
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
@@ -98,7 +93,13 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            debugPrint("Check In ditekan");
+                            // pindah ke halaman CheckInPage
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const GoogleMapsScreen(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
@@ -117,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            print("Check Out ditekan");
+                            _showCheckOutDialog(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
@@ -138,6 +139,56 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCheckOutDialog(BuildContext context) {
+    final now = DateTime.now();
+    final formattedTime = DateFormat('HH:mm').format(now);
+    final formattedDate = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.access_time, size: 50, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
+                "Konfirmasi Check Out",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Text("Jam: $formattedTime"),
+              Text("Tanggal: $formattedDate"),
+              const SizedBox(height: 16),
+              const Text(
+                "Apakah kamu yakin ingin Check Out sekarang?",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              SlideAction(
+                text: "Swipe untuk Check Out",
+                outerColor: Colors.redAccent,
+                innerColor: Colors.white,
+                textStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                onSubmit: () {
+                  Navigator.pop(context);
+                  print("Check Out berhasil!");
+                  return null;
+                },
               ),
             ],
           ),
