@@ -1,4 +1,9 @@
-import 'package:absensi/view/home.dart';
+import 'package:absensi/api/register_user.dart';
+import 'package:absensi/extensions/navigation.dart';
+import 'package:absensi/shared_preference/shared_preference.dart';
+import 'package:absensi/view/register.dart';
+import 'package:absensi/widgets/botnavbar.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -17,6 +22,35 @@ class _LoginState extends State<Login> {
   bool isVisibility = false;
   bool isLoading = false;
   String? errorMessage;
+
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      try {
+        final loginResponse = await AuthenticationAPI.loginUser(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+        PreferenceHandler.saveToken(loginResponse.data?.token ?? '');
+        context.pushReplacement(Botnavbar());
+      } catch (e) {
+        setState(() {
+          errorMessage = e.toString();
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Login gagal: $e')));
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   // Future<void> _saveUserName(String name) async {
   //   final prefs = await SharedPreferences.getInstance();
@@ -38,6 +72,16 @@ class _LoginState extends State<Login> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  child: Image.asset(
+                    "assets/images/login.png",
+                    height: 180,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                SizedBox(height: 50),
                 // Judul Login
                 const Text(
                   "Login",
@@ -47,7 +91,7 @@ class _LoginState extends State<Login> {
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
 
                 // Input Email
                 Align(
@@ -76,22 +120,22 @@ class _LoginState extends State<Login> {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  // validator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return "Email tidak boleh kosong";
-                  //   }
-                  //   if (!value.contains("@")) {
-                  //     return "Email tidak valid";
-                  //   }
-                  //   if (!(value.endsWith("@gmail.com") ||
-                  //       value.endsWith("@yahoo.com"))) {
-                  //     return "Email tidak terdaftar";
-                  //   }
-                  //   if (RegExp('[A-Z]').hasMatch(value)) {
-                  //     return "Email harus huruf kecil";
-                  //   }
-                  //   return null;
-                  // },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Email tidak boleh kosong";
+                    }
+                    if (!value.contains("@")) {
+                      return "Email tidak valid";
+                    }
+                    if (!(value.endsWith("@gmail.com") ||
+                        value.endsWith("@yahoo.com"))) {
+                      return "Email tidak terdaftar";
+                    }
+                    if (RegExp('[A-Z]').hasMatch(value)) {
+                      return "Email harus huruf kecil";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
 
@@ -134,36 +178,36 @@ class _LoginState extends State<Login> {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  // validator: (value) {
-                  //   if (value == null || value.isEmpty) {
-                  //     return "Password tidak boleh kosong";
-                  //   }
-                  //   if (value.length < 6) {
-                  //     return "Password minimal 6 karakter";
-                  //   }
-                  //   return null;
-                  // },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Password tidak boleh kosong";
+                    }
+                    if (value.length < 6) {
+                      return "Password minimal 6 karakter";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
                 // Lupa Password
-                // Align(
-                //   alignment: Alignment.centerLeft,
-                //   child: TextButton(
-                //     onPressed: () {
-                //       // TODO: arahkan ke halaman lupa password
-                //     },
-                //     style: TextButton.styleFrom(
-                //       padding: EdgeInsets.zero,
-                //       minimumSize: Size.zero,
-                //       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                //     ),
-                //     child: const Text(
-                //       "Lupa Password?",
-                //       style: TextStyle(fontSize: 14, color: Colors.grey),
-                //     ),
-                //   ),
-                // ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      // TODO: arahkan ke halaman lupa password
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      "Lupa Password?",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Tombol Login
@@ -171,60 +215,55 @@ class _LoginState extends State<Login> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        print("Email: ${emailController.text}");
-                        print("Password: ${passwordController.text}");
-
-                        // Pindah ke HomePage
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomePage(),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff8A2D3B),
+                      backgroundColor: Color(0xff8A2D3B),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                     ),
-                    child: const Text(
-                      "Masuk",
+                    child: isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            "Masuk",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              // fontFamily: "StageGrotesk_Bold",
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Belum punya akun? ",
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: const Color.fromARGB(182, 100, 100, 106),
+
+                        fontWeight: FontWeight.w400,
                       ),
+
+                      children: [
+                        TextSpan(
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              context.push(RegisterScreen());
+                            },
+                          text: " Daftar",
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: const Color.fromARGB(255, 11, 39, 164),
+                            // fontFamily: "StageGrotesk_Bold",
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Link Daftar
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     const Text(
-                //       "Belum Punya Akun? ",
-                //       style: TextStyle(color: Colors.black54),
-                //     ),
-                //     GestureDetector(
-                //       onTap: () {
-                //         // TODO: pindah ke halaman register
-                //       },
-                //       child: const Text(
-                //         "Daftar",
-                //         style: TextStyle(
-                //           color: Colors.black,
-                //           fontWeight: FontWeight.w600,
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
               ],
             ),
           ),

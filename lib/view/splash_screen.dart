@@ -1,7 +1,7 @@
 import 'package:absensi/extensions/navigation.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/home.dart';
-import 'package:absensi/view/page_awal.dart';
+import 'package:absensi/view/login.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (isLogin == true) {
         context.pushReplacementNamed(HomePage.id);
       } else {
-        context.push(WelcomePage());
+        context.push(Login());
       }
     });
   }
@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/Logo.png"),
+            Image.asset("assets/images/logo.png"),
             SizedBox(height: 20),
             // Text("Welcome"),
           ],

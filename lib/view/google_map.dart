@@ -1,3 +1,4 @@
+import 'package:absensi/api/absensi.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -101,7 +102,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                     const SizedBox(height: 20),
                   ],
 
-                  /// Tombol Swipe
+                  /// Tombol Swipe untuk Check In
                   SlideAction(
                     text: "Geser untuk Check In",
                     textStyle: const TextStyle(
@@ -113,52 +114,24 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                     onSubmit: () async {
                       await _getCurrentLocation();
 
-                      /// simpan jam & tanggal sekarang
                       final now = DateTime.now();
                       setState(() {
                         checkInTime = DateFormat('HH:mm:ss').format(now);
                         checkInDate = DateFormat('dd MMMM yyyy').format(now);
                       });
 
-                      /// tampilkan dialog sukses dengan lottie
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        showDialog(
-                          context: context,
-                          builder: (ctx) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              title: const Text(
-                                "Check In Berhasil 🎉",
-                                textAlign: TextAlign.center,
-                              ),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Lottie.asset(
-                                    "assets/lottie/absen_sukses.json",
-                                    width: 120,
-                                    height: 120,
-                                    repeat: false,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    "Tanggal: $checkInDate\nJam: $checkInTime",
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  child: const Text("OK"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      });
+                      final result = await AbsensiAPI.checkIn(
+                        lat: _currentPosition.latitude,
+                        lng: _currentPosition.longitude,
+                        address: _currentAddress,
+                      );
+
+                      _showResultDialog(
+                        title: "Check In",
+                        message: result?["message"] ?? "Terjadi kesalahan",
+                        date: checkInDate!,
+                        time: checkInTime!,
+                      );
 
                       return null;
                     },
@@ -218,6 +191,49 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
         CameraUpdate.newCameraPosition(
           CameraPosition(target: _currentPosition, zoom: 16),
         ),
+      );
+    });
+  }
+
+  void _showResultDialog({
+    required String title,
+    required String message,
+    required String date,
+    required String time,
+  }) {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text("$title Berhasil 🎉", textAlign: TextAlign.center),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.asset(
+                  "assets/lottie/absen_sukses.json",
+                  width: 120,
+                  height: 120,
+                  repeat: false,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "$message\nTanggal: $date\nJam: $time",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
       );
     });
   }

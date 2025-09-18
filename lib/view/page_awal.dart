@@ -1,8 +1,8 @@
 import 'package:absensi/view/register.dart';
 import 'package:flutter/material.dart';
 
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+class PageAwal extends StatelessWidget {
+  const PageAwal({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +19,16 @@ class WelcomePage extends StatelessWidget {
               child: Column(
                 children: [
                   // Ganti asset dengan logo kamu
-                  Image.asset("assets/images/Logo.png", height: 300),
+                  Image.asset("assets/images/logo.png", height: 300),
                   const SizedBox(height: 12),
-                  // const Text(
-                  //   "MyAbsen",
-                  //   style: TextStyle(
-                  //     fontSize: 32,
-                  //     fontWeight: FontWeight.bold,
-                  //     color: Color(0xFF1E40FF), // Biru terang
-                  //   ),
-                  // ),
+                  const Text(
+                    "Presio",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff8A2D3B),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -84,10 +84,10 @@ class WelcomePage extends StatelessWidget {
                         elevation: 0,
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, Register.id);
+                        Navigator.pushNamed(context, RegisterScreen.id);
                       },
                       child: const Text(
-                        "Daftar",
+                        "Masuk",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -111,10 +111,13 @@ class WelcomePage extends StatelessWidget {
                         elevation: 0,
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, "/login");
+                        Navigator.pushNamed(
+                          context,
+                          "/register",
+                        ); // ganti ke register
                       },
                       child: const Text(
-                        "Masuk",
+                        "Daftar",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

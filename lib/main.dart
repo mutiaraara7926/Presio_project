@@ -24,11 +24,11 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 3, 3, 3),
         ),
       ),
-      initialRoute: '/',
+      // initialRoute: '/',
       routes: {
         '/splash_screen': (context) => const SplashScreen(),
         '/login': (context) => const Login(),
-        '/register': (context) => const Register(),
+        '/register': (context) => const RegisterScreen(),
         // '/home': (context) => const HomePage(),
         // '/bot': (context) => Bottom(),
         // '/lapangan': (context) => LapanganScreen(),
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         // ),
       },
       // home: LoginFutsal(),
-      home: Botnavbar(),
+      home: const Botnavbar(),
     );
   }
 }

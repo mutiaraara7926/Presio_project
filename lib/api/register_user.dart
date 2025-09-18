@@ -1,155 +1,165 @@
-// import 'dart:convert';
-// import 'dart:io';
+import 'dart:convert';
+import 'dart:io';
 
-// class AuthenticationAPI {
-//   static Future<RegisterModel> registerUser({
-//     required String name,
-//     required String email,
-//     required String password,
-//     required String jenisKelamin,
-//     required File profilePhoto,
-//     required int batchId,
-//     required int trainingId,
-//   }) async {
-//     final url = Uri.parse(Endpoint.register);
+import 'package:absensi/api/endpoint.dart';
+import 'package:absensi/model/get_batch_model.dart';
+import 'package:absensi/model/get_list_training_model.dart';
+import 'package:absensi/model/get_profile.dart';
+import 'package:absensi/model/login_model.dart' show LoginModel;
+import 'package:absensi/model/put_profile_model.dart';
+import 'package:absensi/model/register_model.dart';
+import 'package:absensi/shared_preference/shared_preference.dart';
+import 'package:http/http.dart' as http;
 
-//     // baca file -> bytes -> base64
-//     final readImage = profilePhoto.readAsBytesSync();
-//     final b64 = base64Encode(readImage);
+class AuthenticationAPI {
+  static Future<RegisterModel> registerUser({
+    required String name,
+    required String email,
+    required String password,
+    required String jenisKelamin,
+    required File profilePhoto,
+    required int batchId,
+    required int trainingId,
+  }) async {
+    final url = Uri.parse(Endpoint.register);
 
-//     // tambahkan prefix agar dikenali backend
-//     final imageWithPrefix = "data:image/png;base64,$b64";
+    // baca file -> bytes -> base64
+    final readImage = profilePhoto.readAsBytesSync();
+    final b64 = base64Encode(readImage);
 
-//     final response = await http.post(
-//       url,
-//       headers: {
-//         "Accept": "application/json",
-//         "Content-Type": "application/json",
-//       },
-//       body: jsonEncode({
-//         "name": name,
-//         "email": email,
-//         "password": password,
-//         "jenis_kelamin": jenisKelamin,
-//         "profile_photo": imageWithPrefix,
-//         "batch_id": batchId,
-//         "training_id": trainingId,
-//       }),
-//     );
+    // tambahkan prefix agar dikenali backend
+    final imageWithPrefix = "data:image/png;base64,$b64";
 
-//     print("STATUS: ${response.statusCode}");
-//     print("BODY: ${response.body}");
+    final response = await http.post(
+      url,
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "name": name,
+        "email": email,
+        "password": password,
+        "jenis_kelamin": jenisKelamin,
+        "profile_photo": imageWithPrefix,
+        "batch_id": batchId,
+        "training_id": trainingId,
+      }),
+    );
 
-//     if (response.statusCode == 200) {
-//       return RegisterModel.fromJson(json.decode(response.body));
-//     } else {
-//       final error = json.decode(response.body);
-//       throw Exception(error["message"] ?? "Failed to Register");
-//     }
-//   }
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
-//   static Future<LoginModel> loginUser({
-//     required String email,
-//     required String password,
-//   }) async {
-//     final url = Uri.parse(Endpoint.login);
-//     final response = await http.post(
-//       url,
-//       body: {"email": email, "password": password},
-//       headers: {"Accept": "application/json"},
-//     );
+    if (response.statusCode == 200) {
+      return RegisterModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Failed to Register");
+    }
+  }
 
-//     print("Login Response: ${response.body}");
+  static Future<LoginModel> loginUser({
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse(Endpoint.login);
+    final response = await http.post(
+      url,
+      body: {"email": email, "password": password},
+      headers: {"Accept": "application/json"},
+    );
 
-//     if (response.statusCode == 200) {
-//       return LoginModel.fromJson(json.decode(response.body));
-//     } else {
-//       final error = json.decode(response.body);
-//       throw Exception(error["message"] ?? "Login gagal");
-//     }
-//   }
+    print("Login Response: ${response.body}");
 
-//   static Future<PutProfileModel> updateProfile({
-//     required String name,
-//     required String email,
-//   }) async {
-//     final url = Uri.parse(Endpoint.profile);
-//     final token = await PreferenceHandler.getToken();
+    if (response.statusCode == 200) {
+      return LoginModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Login gagal");
+    }
+  }
 
-//     print("Update Profile URL: $url");
-//     print("Update Profile Data: {name: $name, email: $email}");
+  static Future<PutProfileModel> updateProfile({
+    required String name,
+    required String email,
+  }) async {
+    final url = Uri.parse(Endpoint.profile);
+    final token = await PreferenceHandler.getToken();
 
-//     final response = await http.put(
-//       url,
-//       body: {"name": name, "email": email},
-//       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
-//     );
+    print("Update Profile URL: $url");
+    print("Update Profile Data: {name: $name, email: $email}");
 
-//     print("Update Profile Response: ${response.statusCode}");
-//     print("Update Profile Body: ${response.body}");
+    final response = await http.put(
+      url,
+      body: {"name": name, "email": email},
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
 
-//     if (response.statusCode == 200) {
-//       return PutProfileModel.fromJson(json.decode(response.body));
-//     } else {
-//       final error = json.decode(response.body);
-//       throw Exception(
-//         error["message"] ??
-//             "Update profile gagal. Status: ${response.statusCode}",
-//       );
-//     }
-//   }
+    print("Update Profile Response: ${response.statusCode}");
+    print("Update Profile Body: ${response.body}");
 
-//   static Future<GetProfileModel> getProfile() async {
-//     final url = Uri.parse(Endpoint.profile);
-//     final token = await PreferenceHandler.getToken();
+    if (response.statusCode == 200) {
+      return PutProfileModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(
+        error["message"] ??
+            "Update profile gagal. Status: ${response.statusCode}",
+      );
+    }
+  }
 
-//     final response = await http.get(
-//       url,
-//       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
-//     );
+  static Future<GetProfileModel> getProfile() async {
+    final url = Uri.parse(Endpoint.profile);
+    final token = await PreferenceHandler.getToken();
 
-//     print("Profile Status: ${response.statusCode}");
+    final response = await http.get(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
 
-//     if (response.statusCode == 200) {
-//       return GetProfileModel.fromJson(json.decode(response.body));
-//     } else {
-//       final error = json.decode(response.body);
-//       print(error);
-//       throw Exception(error["message"] ?? "Gagal mengambil profil");
-//     }
-//   }
+    print("Profile Status: ${response.statusCode}");
 
-//   static Future<GetListTrainingModel> getListTraining() async {
-//     final url = Uri.parse(Endpoint.training);
-//     final token = await PreferenceHandler.getToken();
+    if (response.statusCode == 200) {
+      return GetProfileModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      print(error);
+      throw Exception(error["message"] ?? "Gagal mengambil profil");
+    }
+  }
 
-//     final response = await http.get(
-//       url,
-//       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
-//     );
+  static Future<GetListTrainingModel> getListTraining() async {
+    final url = Uri.parse(Endpoint.training);
+    final token = await PreferenceHandler.getToken();
 
-//     if (response.statusCode == 200) {
-//       return GetListTrainingModel.fromJson(json.decode(response.body));
-//     } else {
-//       final error = json.decode(response.body);
-//       throw Exception(error["message"] ?? "Gagal mengambil data layanan");
-//     }
-//   }
+    final response = await http.get(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
 
-//   static Future<GetBatchesModel> getListBatch() async {
-//     final url = Uri.parse(Endpoint.batches);
-//     final token = await PreferenceHandler.getToken();
+    if (response.statusCode == 200) {
+      return GetListTrainingModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Gagal mengambil data layanan");
+    }
+  }
 
-//     final response = await http.get(
-//       url,
-//       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
-//     );
+  static Future<GetBatchesModel> getListBatch() async {
+    final url = Uri.parse(Endpoint.batches);
+    final token = await PreferenceHandler.getToken();
 
-//     if (response.statusCode == 200) {
-//       return GetBatchesModel.fromJson(json.decode(response.body));
-//     } else {
-//       final error = json.decode(response.body);
-//       throw Exception(error["message"] ?? "Gagal mengambil data layanan");
-//     }
-//   }
-// }
+    final response = await http.get(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode == 200) {
+      return GetBatchesModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Gagal mengambil data layanan");
+    }
+  }
+}

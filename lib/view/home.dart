@@ -1,3 +1,6 @@
+import 'package:absensi/api/profile.dart';
+import 'package:absensi/model/get_profile.dart';
+import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/google_map.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +15,46 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  GetProfileModel? user; // simpan nama user
+  bool isLoading = true;
+  String userName = "";
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() async {
+    setState(() => isLoading = true);
+
+    try {
+      final userData = await ProfileAPI.getProfile();
+      setState(() {
+        user = userData;
+        userName = userData.data?.name ?? "";
+      });
+      await PreferenceHandler.setUserName(userName);
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
+      print("Error loading user data: $e");
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return "Pagi";
+    } else if (hour < 17) {
+      return "Siang";
+    } else {
+      return "Malam";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +92,9 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Selamat pagi, User!",
+                      isLoading
+                          ? "Memuat data..."
+                          : "Selamat ${_greeting()}, ${userName}!",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
