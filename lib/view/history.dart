@@ -1,12 +1,12 @@
-import 'dart:convert';
-
+import 'package:absensi/api/history_api.dart';
+import 'package:absensi/model/history_model.dart';
 import 'package:clean_calendar/clean_calendar.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
+  static const id = "/history";
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -14,92 +14,72 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   List<DateTime> selectedDates = [];
-  Map<String, dynamic>? absenData;
-  List<dynamic> historyData = [];
   bool isLoading = true;
   DateTime? selectedDate;
+
+  // pakai model Datum
+  Datum? absenToday;
+  List<Datum> historyData = [];
 
   @override
   void initState() {
     super.initState();
-    fetchAbsenToday();
+    _fetchHistory();
   }
 
-  Future<void> fetchAbsenToday() async {
+  Future<void> _fetchHistory() async {
+    setState(() => isLoading = true);
     try {
-      final response = await http.get(
-        Uri.parse("https://appabsensi.mobileprojp.com/api/absen/today"),
-        headers: {
-          "Accept": "application/json",
-          // tambahkan authorization jika diperlukan
-          // "Authorization": "Bearer $token",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        setState(() {
-          absenData = result['data'];
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
+      final result =
+          await HistoryService.getHistory(); // return HistoryAbsenModel
       setState(() {
+        historyData = result.data ?? [];
+        // cari data absensi hari ini
+        final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        absenToday = historyData.firstWhere(
+          (item) =>
+              DateFormat('yyyy-MM-dd').format(item.attendanceDate!) == today,
+          orElse: () => Datum(),
+        );
         isLoading = false;
       });
-      debugPrint("Error fetch absen today: $e");
+    } catch (e) {
+      debugPrint("Error fetch history: $e");
+      setState(() => isLoading = false);
     }
   }
 
-  Future<void> fetchHistoryByDate(DateTime date) async {
+  Future<void> _fetchHistoryByDate(DateTime date) async {
     setState(() {
       isLoading = true;
       selectedDate = date;
     });
-
     try {
-      // Format tanggal untuk API (YYYY-MM-DD)
-      String formattedDate = DateFormat('yyyy-MM-dd').format(date);
-
-      final response = await http.get(
-        Uri.parse(
-          "https://appabsensi.mobileprojp.com/api/absen/history?date=$formattedDate",
-        ),
-        headers: {
-          "Accept": "application/json",
-          // "Authorization": "Bearer $token", // uncomment jika perlu auth
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        setState(() {
-          historyData = result['data'] ?? [];
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-          historyData = [];
-        });
-      }
-    } catch (e) {
+      final result = await HistoryService.getHistory();
+      final formattedDate = DateFormat('yyyy-MM-dd').format(date);
       setState(() {
+        historyData = (result.data ?? [])
+            .where(
+              (item) =>
+                  DateFormat('yyyy-MM-dd').format(item.attendanceDate!) ==
+                  formattedDate,
+            )
+            .toList();
         isLoading = false;
-        historyData = [];
       });
-      debugPrint("Error fetch history: $e");
+    } catch (e) {
+      debugPrint("Error fetch history by date: $e");
+      setState(() {
+        historyData = [];
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xff8A2D3B),
@@ -154,14 +134,11 @@ class _HistoryPageState extends State<HistoryPage> {
               dateSelectionMode: DatePickerSelectionMode.singleOrMultiple,
               startWeekday: WeekDay.monday,
               selectedDates: selectedDates,
-              onCalendarViewDate: (DateTime calendarViewDate) {},
               onSelectedDates: (List<DateTime> value) {
-                setState(() {
-                  selectedDates = value;
-                  if (value.isNotEmpty) {
-                    fetchHistoryByDate(value.first);
-                  }
-                });
+                setState(() => selectedDates = value);
+                if (value.isNotEmpty) {
+                  _fetchHistoryByDate(value.first);
+                }
               },
             ),
           ),
@@ -171,14 +148,13 @@ class _HistoryPageState extends State<HistoryPage> {
             selectedDate != null
                 ? "Absensi tanggal ${DateFormat('dd MMMM yyyy').format(selectedDate!)}"
                 : "Absensi hari ini",
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(0xff8A2D3B),
             ),
           ),
           const SizedBox(height: 12),
 
-          // List Absensi
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -192,7 +168,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildTodayAbsen() {
-    return absenData == null
+    return absenToday == null || absenToday!.id == null
         ? const Center(
             child: Text(
               "Belum ada data absensi hari ini",
@@ -201,14 +177,7 @@ class _HistoryPageState extends State<HistoryPage> {
           )
         : ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _buildAbsenCard(
-                checkInTime: absenData?['check_in_time'],
-                checkOutTime: absenData?['check_out_time'],
-                checkInAddress: absenData?['check_in_address'],
-                checkOutAddress: absenData?['check_out_address'],
-              ),
-            ],
+            children: [_buildAbsenCard(absenToday!)],
           );
   }
 
@@ -225,22 +194,12 @@ class _HistoryPageState extends State<HistoryPage> {
             itemCount: historyData.length,
             itemBuilder: (context, index) {
               final absen = historyData[index];
-              return _buildAbsenCard(
-                checkInTime: absen['check_in_time'],
-                checkOutTime: absen['check_out_time'],
-                checkInAddress: absen['check_in_address'],
-                checkOutAddress: absen['check_out_address'],
-              );
+              return _buildAbsenCard(absen);
             },
           );
   }
 
-  Widget _buildAbsenCard({
-    required String? checkInTime,
-    required String? checkOutTime,
-    required String? checkInAddress,
-    required String? checkOutAddress,
-  }) {
+  Widget _buildAbsenCard(Datum absen) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -254,6 +213,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // check in
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -263,7 +223,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                checkInTime ?? "-",
+                absen.checkInTime ?? "-",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -271,11 +231,12 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                checkInAddress ?? "-",
+                absen.checkInAddress ?? "-",
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
             ],
           ),
+          // check out
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -285,7 +246,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                checkOutTime ?? "-",
+                absen.checkOutTime ?? "-",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.deepOrange,
@@ -294,7 +255,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                checkOutAddress ?? "-",
+                absen.checkOutAddress ?? "-",
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
             ],

@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:absensi/shared_preference/shared_preference.dart';
+import 'package:absensi/view/edit_profille.dart';
+import 'package:absensi/view/page_awal.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -12,6 +15,23 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   File? _image;
+  // Tambahkan variabel di atas
+  bool isLoading = true;
+  String? userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await PreferenceHandler.getUserName();
+    setState(() {
+      userName = name;
+      isLoading = false;
+    });
+  }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -24,6 +44,15 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _logout() async {
+    await PreferenceHandler.clearAll();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const PageAwal()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,19 +61,6 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-
-            // Back button
-            // Row(
-            //   children: [
-            //     IconButton(
-            //       icon: const Icon(Icons.arrow_back, color: Colors.black54),
-            //       onPressed: () {
-            //         Navigator.pop(context);
-            //       },
-            //     ),
-            //   ],
-            // ),
-            const SizedBox(height: 10),
 
             // Foto Profil
             GestureDetector(
@@ -61,36 +77,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 15),
 
-            // Nama
-            const Text(
-              "Stephanie Milton",
-              style: TextStyle(
+            Text(
+              isLoading
+                  ? "Memuat data..."
+                  : (userName ?? "Nama tidak tersedia"),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 238, 211, 211),
               ),
             ),
 
-            const SizedBox(height: 6),
-
-            // Badge Favorite
-            // Container(
-            //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            //   decoration: BoxDecoration(
-            //     color: Color.fromARGB(255, 238, 211, 211),
-            //     borderRadius: BorderRadius.circular(20),
-            //   ),
-            //   child: const Text(
-            //     "Favorite",
-            //     style: TextStyle(
-            //       color: Color(0xff8A2D3B),
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            // ),
             const SizedBox(height: 30),
 
-            // List menu
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -102,55 +101,120 @@ class _ProfilePageState extends State<ProfilePage> {
                     topRight: Radius.circular(30),
                   ),
                 ),
-
                 child: Column(
                   children: [
-                    SizedBox(height: 20),
-                    _buildMenuItem(
-                      Icons.chat_bubble_outline,
-                      "Start a chat",
-                      onTap: () {},
+                    const SizedBox(height: 20),
+
+                    Card(
+                      color: Colors.red.shade100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.person,
+                          color: Colors.black54,
+                        ),
+                        title: const Text("Edit Akun"),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EditProfileScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    SizedBox(height: 20),
-                    _buildMenuItem(
-                      Icons.person_outline,
-                      "Expert replies",
-                      onTap: () {},
+
+                    const SizedBox(height: 20),
+
+                    Card(
+                      color: Colors.red.shade100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.help_outline,
+                          color: Colors.black54,
+                        ),
+                        title: const Text("Tentang Aplikasi"),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {},
+                      ),
                     ),
-                    SizedBox(height: 20),
-                    _buildMenuItem(
-                      Icons.star_border,
-                      "Review ratings",
-                      onTap: () {},
-                    ),
-                    SizedBox(height: 20),
-                    _buildMenuItem(
-                      Icons.help_outline,
-                      "Asked questions",
-                      onTap: () {},
+                    const SizedBox(height: 200),
+
+                    Card(
+                      color: Colors.red.shade100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.logout,
+                          color: Color(0xff8A2D3B),
+                        ),
+                        title: const Text(
+                          "Logout",
+                          style: TextStyle(
+                            color: Color(0xff8A2D3B),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onTap: () {
+                          showDialog(
+                            // barrierColor: Colors.red.shade100,
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              title: const Text(
+                                "Konfirmasi Logout",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              content: const Text(
+                                "Apakah kamu yakin ingin keluar?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(ctx), // tutup dialog
+                                  child: const Text(
+                                    "Tidak",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx); // tutup dialog
+                                    _logout(); // panggil fungsi logout
+                                  },
+                                  child: const Text(
+                                    "Ya",
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
+            // const SizedBox(height: 20),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildMenuItem(IconData icon, String title, {VoidCallback? onTap}) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: Colors.grey.shade100,
-        child: Icon(icon, color: Colors.black54),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
     );
   }
 }

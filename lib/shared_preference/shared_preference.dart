@@ -82,4 +82,9 @@ class PreferenceHandler {
     await prefs.remove(userNameKey);
     await prefs.setBool(loginKey, false);
   }
+
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
 }

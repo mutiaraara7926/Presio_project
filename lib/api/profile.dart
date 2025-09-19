@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:absensi/api/endpoint.dart';
+import 'package:absensi/api/endpoint/endpoint.dart';
 import 'package:absensi/model/get_profile.dart';
 import 'package:absensi/model/put_profile_model.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';

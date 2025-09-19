@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:absensi/api/endpoint.dart';
+import 'package:absensi/api/endpoint/endpoint.dart';
 import 'package:absensi/model/get_batch_model.dart';
 import 'package:absensi/model/get_list_training_model.dart';
 import 'package:absensi/model/get_profile.dart';

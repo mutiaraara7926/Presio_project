@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:absensi/api/register_user.dart';
+import 'package:absensi/api/authentic_api.dart';
 import 'package:absensi/extensions/navigation.dart';
 import 'package:absensi/model/get_batch_model.dart';
 import 'package:absensi/model/get_list_training_model.dart';

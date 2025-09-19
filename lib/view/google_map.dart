@@ -1,4 +1,5 @@
 import 'package:absensi/api/absensi.dart';
+import 'package:absensi/view/history.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -22,6 +23,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
 
   String? checkInTime;
   String? checkInDate;
+  bool isCheckedIn = false; // status apakah sudah check-in
 
   @override
   void initState() {
@@ -103,39 +105,52 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                   ],
 
                   /// Tombol Swipe untuk Check In
-                  SlideAction(
-                    text: "Geser untuk Check In",
-                    textStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                  if (!isCheckedIn)
+                    SlideAction(
+                      text: "Geser untuk Check In",
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      outerColor: Colors.green[400],
+                      innerColor: Colors.white,
+                      onSubmit: () async {
+                        await _getCurrentLocation();
+
+                        final now = DateTime.now();
+                        setState(() {
+                          checkInTime = DateFormat('HH:mm:ss').format(now);
+                          checkInDate = DateFormat('dd MMMM yyyy').format(now);
+                          isCheckedIn = true;
+                        });
+
+                        final result = await AbsensiAPI.checkIn(
+                          lat: _currentPosition.latitude,
+                          lng: _currentPosition.longitude,
+                          address: _currentAddress,
+                        );
+
+                        _showResultDialog(
+                          title: "Check In",
+                          message: result?["message"] ?? "Terjadi kesalahan",
+                          date: checkInDate!,
+                          time: checkInTime!,
+                        );
+
+                        return null;
+                      },
+                    )
+                  else
+                    const Center(
+                      child: Text(
+                        "Anda sudah melakukan Check In",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
                     ),
-                    outerColor: Colors.green[400],
-                    innerColor: Colors.white,
-                    onSubmit: () async {
-                      await _getCurrentLocation();
-
-                      final now = DateTime.now();
-                      setState(() {
-                        checkInTime = DateFormat('HH:mm:ss').format(now);
-                        checkInDate = DateFormat('dd MMMM yyyy').format(now);
-                      });
-
-                      final result = await AbsensiAPI.checkIn(
-                        lat: _currentPosition.latitude,
-                        lng: _currentPosition.longitude,
-                        address: _currentAddress,
-                      );
-
-                      _showResultDialog(
-                        title: "Check In",
-                        message: result?["message"] ?? "Terjadi kesalahan",
-                        date: checkInDate!,
-                        time: checkInTime!,
-                      );
-
-                      return null;
-                    },
-                  ),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -204,12 +219,13 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
     Future.delayed(const Duration(milliseconds: 500), () {
       showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (ctx) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: Text("$title Berhasil 🎉", textAlign: TextAlign.center),
+            title: Text("$title Berhasil ", textAlign: TextAlign.center),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -228,8 +244,11 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("OK"),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushReplacementNamed(ctx, HistoryPage.id);
+                },
+                child: const Text("Lihat History"),
               ),
             ],
           );

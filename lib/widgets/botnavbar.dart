@@ -21,6 +21,7 @@ class _BotnavbarState extends State<Botnavbar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(child: widgetOptions[currentIndex]),
       bottomNavigationBar: CrystalNavigationBar(
         currentIndex: currentIndex,
@@ -50,7 +51,7 @@ class _BotnavbarState extends State<Botnavbar> {
             // ),
           ),
           CrystalNavigationBarItem(
-            icon: Icons.bar_chart,
+            icon: Icons.bar_chart_outlined,
             unselectedIcon: Icons.bar_chart_outlined,
             selectedColor: Color(0xff8A2D3B),
             // badge: Badge(

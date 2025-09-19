@@ -1,8 +1,10 @@
+import 'package:absensi/api/absensi.dart';
 import 'package:absensi/api/profile.dart';
 import 'package:absensi/model/get_profile.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/google_map.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
@@ -58,6 +60,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),
@@ -229,9 +232,52 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
-                onSubmit: () {
-                  Navigator.pop(context);
-                  print("Check Out berhasil!");
+                onSubmit: () async {
+                  Navigator.pop(context); // tutup dialog dulu
+
+                  try {
+                    // ambil lokasi user real-time
+                    Position position = await Geolocator.getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.high,
+                    );
+
+                    double lat = position.latitude;
+                    double lng = position.longitude;
+                    String location = "$lat, $lng";
+                    String address =
+                        "Lokasi saat ini"; // bisa diganti pakai geocoding
+
+                    final result = await AbsensiAPI.checkOut(
+                      checkOutLat: lat,
+                      checkOutLng: lng,
+                      checkOutLocation: location,
+                      checkOutAddress: address,
+                    );
+
+                    if (result != null && result.message != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result.message!),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Check Out gagal, coba lagi."),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Error: $e"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+
                   return null;
                 },
               ),

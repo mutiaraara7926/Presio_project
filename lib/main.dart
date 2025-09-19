@@ -1,7 +1,8 @@
+import 'package:absensi/view/history.dart';
+import 'package:absensi/view/home.dart';
 import 'package:absensi/view/login.dart';
 import 'package:absensi/view/register.dart';
 import 'package:absensi/view/splash_screen.dart';
-import 'package:absensi/widgets/botnavbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -24,22 +25,16 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 3, 3, 3),
         ),
       ),
-      // initialRoute: '/',
+
       routes: {
         '/splash_screen': (context) => const SplashScreen(),
         '/login': (context) => const Login(),
         '/register': (context) => const RegisterScreen(),
-        // '/home': (context) => const HomePage(),
-        // '/bot': (context) => Bottom(),
-        // '/lapangan': (context) => LapanganScreen(),
-        // '/add': (context) => AddFieldScreen(
-        //   onFieldAdded: (field) {
-        //     print("Lapangan baru: ${field!.nama}");
-        //   },
-        // ),
+        '/home': (context) => const HomePage(),
+        '/history': (context) => const HistoryPage(),
       },
-      // home: LoginFutsal(),
-      home: const Botnavbar(),
+
+      home: const SplashScreen(),
     );
   }
 }

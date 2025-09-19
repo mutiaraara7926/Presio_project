@@ -1,4 +1,4 @@
-import 'package:absensi/api/register_user.dart';
+import 'package:absensi/api/authentic_api.dart';
 import 'package:absensi/extensions/navigation.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/register.dart';

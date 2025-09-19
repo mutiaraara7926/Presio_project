@@ -1,3 +1,7 @@
+// import 'package:absensi/extensions/navigation.dart';
+// import 'package:absensi/shared_preference/shared_preference.dart';
+// import 'package:absensi/view/home.dart';
+// import 'package:absensi/view/login.dart';
 import 'package:absensi/extensions/navigation.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/home.dart';
@@ -25,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(Duration(seconds: 3)).then((value) async {
       print(isLogin);
       if (isLogin == true) {
-        context.pushReplacementNamed(HomePage.id);
+        context.pushReplacement(HomePage());
       } else {
         context.push(Login());
       }
