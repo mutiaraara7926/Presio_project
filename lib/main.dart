@@ -3,6 +3,7 @@ import 'package:absensi/view/home.dart';
 import 'package:absensi/view/login.dart';
 import 'package:absensi/view/register.dart';
 import 'package:absensi/view/splash_screen.dart';
+import 'package:absensi/widgets/autochek.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         '/history': (context) => const HistoryPage(),
       },
 
-      home: const SplashScreen(),
+      home: const AuthCheckPage(),
     );
   }
 }

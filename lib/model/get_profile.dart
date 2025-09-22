@@ -29,6 +29,7 @@ class Data {
   int? id;
   String? name;
   String? email;
+  String? profilePhoto;
   dynamic emailVerifiedAt;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -37,6 +38,7 @@ class Data {
     this.id,
     this.name,
     this.email,
+    this.profilePhoto,
     this.emailVerifiedAt,
     this.createdAt,
     this.updatedAt,
@@ -46,6 +48,7 @@ class Data {
     id: json["id"],
     name: json["name"],
     email: json["email"],
+    profilePhoto: json["profile_photo"],
     emailVerifiedAt: json["email_verified_at"],
     createdAt: json["created_at"] == null
         ? null
@@ -59,6 +62,7 @@ class Data {
     "id": id,
     "name": name,
     "email": email,
+    "profile_photo": profilePhoto,
     "email_verified_at": emailVerifiedAt,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),

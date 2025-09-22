@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:absensi/api/profile.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/edit_profille.dart';
 import 'package:absensi/view/page_awal.dart';
@@ -15,22 +16,49 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   File? _image;
-  // Tambahkan variabel di atas
+  String? _networkImageUrl;
   bool isLoading = true;
   String? userName;
+
+  // Base URL server untuk path relatif
+  final String baseUrl = "https://appabsensi.mobileprojp.com";
 
   @override
   void initState() {
     super.initState();
-    _loadUserName();
+    _loadUserProfile();
   }
 
-  Future<void> _loadUserName() async {
-    final name = await PreferenceHandler.getUserName();
-    setState(() {
-      userName = name;
-      isLoading = false;
-    });
+  Future<void> _loadUserProfile() async {
+    setState(() => isLoading = true);
+    try {
+      final name = await PreferenceHandler.getUserName();
+      final profile = await ProfileAPI.getProfile();
+
+      setState(() {
+        userName = name;
+        final profilePhoto = profile.data?.profilePhoto;
+
+        if (profilePhoto != null) {
+          if (profilePhoto.startsWith("http")) {
+            _networkImageUrl = profilePhoto;
+          } else {
+            // Tambahkan slash jika tidak ada
+            final path = profilePhoto.startsWith('/')
+                ? profilePhoto.substring(1)
+                : profilePhoto;
+            _networkImageUrl = "$baseUrl/$path";
+          }
+        } else {
+          _networkImageUrl = null;
+        }
+
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Error load profile: $e");
+      setState(() => isLoading = false);
+    }
   }
 
   Future<void> _pickImage() async {
@@ -41,6 +69,25 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         _image = File(pickedFile.path);
       });
+
+      // Upload ke server
+      try {
+        final result = await ProfileAPI.updateProfilePhoto(image: _image);
+        final profilePhoto = result.data?.profilePhoto;
+
+        if (profilePhoto != null) {
+          if (profilePhoto.startsWith("http")) {
+            setState(() => _networkImageUrl = profilePhoto);
+          } else {
+            final path = profilePhoto.startsWith('/')
+                ? profilePhoto.substring(1)
+                : profilePhoto;
+            setState(() => _networkImageUrl = "$baseUrl/$path");
+          }
+        }
+      } catch (e) {
+        print("Error upload photo: $e");
+      }
     }
   }
 
@@ -68,8 +115,12 @@ class _ProfilePageState extends State<ProfilePage> {
               child: CircleAvatar(
                 radius: 55,
                 backgroundColor: Colors.white,
-                backgroundImage: _image != null ? FileImage(_image!) : null,
-                child: _image == null
+                backgroundImage: _image != null
+                    ? FileImage(_image!)
+                    : (_networkImageUrl != null
+                          ? NetworkImage(_networkImageUrl!)
+                          : null),
+                child: (_image == null && _networkImageUrl == null)
                     ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
                     : null,
               ),
@@ -84,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 238, 211, 211),
+                color: Colors.white,
               ),
             ),
 
@@ -105,6 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     const SizedBox(height: 20),
 
+                    // Tentang Aplikasi
                     Card(
                       color: Colors.red.shade100,
                       shape: RoundedRectangleBorder(
@@ -112,10 +164,63 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: ListTile(
                         leading: const Icon(
-                          Icons.person,
+                          Icons.help_outline,
                           color: Colors.black54,
                         ),
-                        title: const Text("Edit Akun"),
+                        title: const Text("Tentang Aplikasi"),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              title: const Text(
+                                "Tentang Aplikasi",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xff8A2D3B),
+                                ),
+                              ),
+                              content: const Text(
+                                "Aplikasi absensi ini tidak hanya memudahkan pengguna untuk melakukan "
+                                "Check In dan Check Out berbasis lokasi secara real-time, tetapi juga menyediakan "
+                                "fitur riwayat absensi yang menampilkan catatan harian secara lengkap. Selain itu, aplikasi "
+                                "ini dilengkapi dengan fitur konversi absensi ke PDF, sehingga laporan kehadiran dapat disimpan "
+                                "atau dibagikan dengan lebih mudah. Dengan tampilan sederhana, informatif, dan user-friendly, aplikasi "
+                                "ini dirancang untuk membuat proses absensi menjadi lebih praktis, efisien, dan terdokumentasi dengan baik.",
+                                textAlign: TextAlign.justify,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text(
+                                    "Tutup",
+                                    style: TextStyle(color: Color(0xff8A2D3B)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Pengaturan Akun
+                    Card(
+                      color: Colors.red.shade100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.settings,
+                          color: Colors.black54,
+                        ),
+                        title: const Text("Pengaturan Akun"),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           Navigator.push(
@@ -130,23 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 20),
 
-                    Card(
-                      color: Colors.red.shade100,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ListTile(
-                        leading: const Icon(
-                          Icons.help_outline,
-                          color: Colors.black54,
-                        ),
-                        title: const Text("Tentang Aplikasi"),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {},
-                      ),
-                    ),
-                    const SizedBox(height: 200),
-
+                    // Logout
                     Card(
                       color: Colors.red.shade100,
                       shape: RoundedRectangleBorder(
@@ -166,7 +255,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         onTap: () {
                           showDialog(
-                            // barrierColor: Colors.red.shade100,
                             context: context,
                             builder: (ctx) => AlertDialog(
                               shape: RoundedRectangleBorder(
@@ -181,8 +269,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(ctx), // tutup dialog
+                                  onPressed: () => Navigator.pop(ctx),
                                   child: const Text(
                                     "Tidak",
                                     style: TextStyle(color: Colors.black),
@@ -190,8 +277,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.pop(ctx); // tutup dialog
-                                    _logout(); // panggil fungsi logout
+                                    Navigator.pop(ctx);
+                                    _logout();
                                   },
                                   child: const Text(
                                     "Ya",
@@ -211,7 +298,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            // const SizedBox(height: 20),
           ],
         ),
       ),

@@ -19,7 +19,7 @@ class PageAwal extends StatelessWidget {
               child: Column(
                 children: [
                   // Ganti asset dengan logo kamu
-                  Image.asset("assets/images/logo.png", height: 300),
+                  Image.asset("assets/images/Logo.png", height: 300),
                   const SizedBox(height: 12),
                   const Text(
                     "Presio",

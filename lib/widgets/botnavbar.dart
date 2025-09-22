@@ -32,9 +32,9 @@ class _BotnavbarState extends State<Botnavbar> {
         outlineBorderColor: Color(0xff8A2D3B),
         backgroundColor: const Color.fromARGB(
           255,
-          255,
-          161,
-          161,
+          168,
+          20,
+          20,
         ).withValues(alpha: 0.5),
         onTap: (index) {
           setState(() {
@@ -45,7 +45,7 @@ class _BotnavbarState extends State<Botnavbar> {
           CrystalNavigationBarItem(
             icon: Icons.home,
             unselectedIcon: Icons.home_outlined,
-            selectedColor: Color(0xff8A2D3B),
+            selectedColor: Colors.white,
             // badge: Badge(
             //   label: Text("Home", style: TextStyle(color: Colors.white)),
             // ),
@@ -53,7 +53,7 @@ class _BotnavbarState extends State<Botnavbar> {
           CrystalNavigationBarItem(
             icon: Icons.bar_chart_outlined,
             unselectedIcon: Icons.bar_chart_outlined,
-            selectedColor: Color(0xff8A2D3B),
+            selectedColor: Colors.white,
             // badge: Badge(
             //   label: Text("Home", style: TextStyle(color: Colors.white)),
             // ),
@@ -61,7 +61,7 @@ class _BotnavbarState extends State<Botnavbar> {
           CrystalNavigationBarItem(
             icon: Icons.person,
             unselectedIcon: Icons.person_outline,
-            selectedColor: Color(0xff8A2D3B),
+            selectedColor: Colors.white,
             // badge: Badge(
             //   label: Text("Home", style: TextStyle(color: Colors.white)),
             // ),

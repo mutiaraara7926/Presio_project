@@ -1,5 +1,5 @@
 import 'package:absensi/api/absensi.dart';
-import 'package:absensi/view/history.dart';
+import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -23,12 +23,54 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
 
   String? checkInTime;
   String? checkInDate;
-  bool isCheckedIn = false; // status apakah sudah check-in
+  bool isCheckedIn = false;
 
   @override
   void initState() {
     super.initState();
+    _loadCheckInStatus();
     _getCurrentLocation();
+  }
+
+  Future<void> _loadCheckInStatus() async {
+    final checkInData = await PreferenceHandler.getCheckIn();
+    if (checkInData.isNotEmpty) {
+      setState(() {
+        isCheckedIn = true;
+        checkInDate = checkInData["date"];
+        checkInTime = checkInData["time"];
+      });
+    }
+  }
+
+  Future<void> _handleCheckIn() async {
+    await _getCurrentLocation();
+
+    final now = DateTime.now();
+    final date = DateFormat('dd MMMM yyyy').format(now);
+    final time = DateFormat('HH:mm:ss').format(now);
+
+    setState(() {
+      checkInDate = date;
+      checkInTime = time;
+      isCheckedIn = true;
+    });
+
+    // Simpan ke SharedPreferences
+    await PreferenceHandler.saveCheckIn(date, time);
+
+    final result = await AbsensiAPI.checkIn(
+      lat: _currentPosition.latitude,
+      lng: _currentPosition.longitude,
+      address: _currentAddress,
+    );
+
+    _showResultDialog(
+      title: "Check In",
+      message: result?["message"] ?? "Terjadi kesalahan",
+      date: date,
+      time: time,
+    );
   }
 
   @override
@@ -104,53 +146,39 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                     const SizedBox(height: 20),
                   ],
 
-                  /// Tombol Swipe untuk Check In
-                  if (!isCheckedIn)
-                    SlideAction(
-                      text: "Geser untuk Check In",
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      outerColor: Colors.green[400],
-                      innerColor: Colors.white,
-                      onSubmit: () async {
-                        await _getCurrentLocation();
-
-                        final now = DateTime.now();
-                        setState(() {
-                          checkInTime = DateFormat('HH:mm:ss').format(now);
-                          checkInDate = DateFormat('dd MMMM yyyy').format(now);
-                          isCheckedIn = true;
-                        });
-
-                        final result = await AbsensiAPI.checkIn(
-                          lat: _currentPosition.latitude,
-                          lng: _currentPosition.longitude,
-                          address: _currentAddress,
-                        );
-
-                        _showResultDialog(
-                          title: "Check In",
-                          message: result?["message"] ?? "Terjadi kesalahan",
-                          date: checkInDate!,
-                          time: checkInTime!,
-                        );
-
-                        return null;
-                      },
-                    )
-                  else
-                    const Center(
-                      child: Text(
-                        "Anda sudah melakukan Check In",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                  /// SlideAction atau Sudah Check In
+                  isCheckedIn
+                      ? Container(
+                          width: double.infinity,
+                          height: 60,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.green[400],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            "Sudah Check In",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        )
+                      : SlideAction(
+                          text: "Geser untuk Check In",
+                          textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          outerColor: Colors.green[400],
+                          innerColor: Colors.white,
+                          onSubmit: () async {
+                            await _handleCheckIn();
+                            return null;
+                          },
                         ),
-                      ),
-                    ),
+
                   const SizedBox(height: 10),
                 ],
               ),
@@ -246,9 +274,8 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  Navigator.pushReplacementNamed(ctx, HistoryPage.id);
                 },
-                child: const Text("Lihat History"),
+                child: const Text("Simpan"),
               ),
             ],
           );

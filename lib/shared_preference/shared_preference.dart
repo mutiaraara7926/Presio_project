@@ -87,4 +87,54 @@ class PreferenceHandler {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
+
+  static Future<void> setUserProfileImagePath(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_image_path', path);
+  }
+
+  static Future<String?> getUserProfileImagePath() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('profile_image_path');
+  }
+
+  static const String checkInKey = "check_in";
+  static const String checkInDateKey = "check_in_date";
+  static const String checkInTimeKey = "check_in_time";
+
+  static Future<void> saveCheckIn(String date, String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(checkInKey, true);
+    await prefs.setString(checkInDateKey, date);
+    await prefs.setString(checkInTimeKey, time);
+  }
+
+  static Future<Map<String, String?>> getCheckIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isCheckedIn = prefs.getBool(checkInKey) ?? false;
+    final date = prefs.getString(checkInDateKey);
+    final time = prefs.getString(checkInTimeKey);
+    if (!isCheckedIn) return {};
+    return {"date": date, "time": time};
+  }
+
+  static const String checkOutKey = "check_out";
+  static const String checkOutDateKey = "check_out_date";
+  static const String checkOutTimeKey = "check_out_time";
+
+  static Future<void> saveCheckOut(String date, String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(checkOutKey, true);
+    await prefs.setString(checkOutDateKey, date);
+    await prefs.setString(checkOutTimeKey, time);
+  }
+
+  static Future<Map<String, String?>> getCheckOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isCheckedOut = prefs.getBool(checkOutKey) ?? false;
+    final date = prefs.getString(checkOutDateKey);
+    final time = prefs.getString(checkOutTimeKey);
+    if (!isCheckedOut) return {};
+    return {"date": date, "time": time};
+  }
 }

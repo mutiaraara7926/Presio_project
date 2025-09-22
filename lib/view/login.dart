@@ -1,6 +1,7 @@
 import 'package:absensi/api/authentic_api.dart';
 import 'package:absensi/extensions/navigation.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
+import 'package:absensi/view/forgot_pass_page.dart';
 import 'package:absensi/view/register.dart';
 import 'package:absensi/widgets/botnavbar.dart';
 import 'package:flutter/gestures.dart';
@@ -193,21 +194,22 @@ class _LoginState extends State<Login> {
                 // Lupa Password
                 Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // TODO: arahkan ke halaman lupa password
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordPage(),
+                        ),
+                      );
                     },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
                     child: const Text(
                       "Lupa Password?",
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
 
                 // Tombol Login

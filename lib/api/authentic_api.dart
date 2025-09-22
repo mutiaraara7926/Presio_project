@@ -8,10 +8,12 @@ import 'package:absensi/model/get_profile.dart';
 import 'package:absensi/model/login_model.dart' show LoginModel;
 import 'package:absensi/model/put_profile_model.dart';
 import 'package:absensi/model/register_model.dart';
+import 'package:absensi/model/reset_password.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:http/http.dart' as http;
 
 class AuthenticationAPI {
+  // Register
   static Future<RegisterModel> registerUser({
     required String name,
     required String email,
@@ -23,11 +25,8 @@ class AuthenticationAPI {
   }) async {
     final url = Uri.parse(Endpoint.register);
 
-    // baca file -> bytes -> base64
     final readImage = profilePhoto.readAsBytesSync();
     final b64 = base64Encode(readImage);
-
-    // tambahkan prefix agar dikenali backend
     final imageWithPrefix = "data:image/png;base64,$b64";
 
     final response = await http.post(
@@ -47,9 +46,6 @@ class AuthenticationAPI {
       }),
     );
 
-    print("STATUS: ${response.statusCode}");
-    print("BODY: ${response.body}");
-
     if (response.statusCode == 200) {
       return RegisterModel.fromJson(json.decode(response.body));
     } else {
@@ -58,6 +54,7 @@ class AuthenticationAPI {
     }
   }
 
+  // Login
   static Future<LoginModel> loginUser({
     required String email,
     required String password,
@@ -69,8 +66,6 @@ class AuthenticationAPI {
       headers: {"Accept": "application/json"},
     );
 
-    print("Login Response: ${response.body}");
-
     if (response.statusCode == 200) {
       return LoginModel.fromJson(json.decode(response.body));
     } else {
@@ -79,6 +74,7 @@ class AuthenticationAPI {
     }
   }
 
+  // Update profile
   static Future<PutProfileModel> updateProfile({
     required String name,
     required String email,
@@ -86,17 +82,11 @@ class AuthenticationAPI {
     final url = Uri.parse(Endpoint.profile);
     final token = await PreferenceHandler.getToken();
 
-    print("Update Profile URL: $url");
-    print("Update Profile Data: {name: $name, email: $email}");
-
     final response = await http.put(
       url,
       body: {"name": name, "email": email},
       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
     );
-
-    print("Update Profile Response: ${response.statusCode}");
-    print("Update Profile Body: ${response.body}");
 
     if (response.statusCode == 200) {
       return PutProfileModel.fromJson(json.decode(response.body));
@@ -109,6 +99,7 @@ class AuthenticationAPI {
     }
   }
 
+  // Get profile
   static Future<GetProfileModel> getProfile() async {
     final url = Uri.parse(Endpoint.profile);
     final token = await PreferenceHandler.getToken();
@@ -118,17 +109,15 @@ class AuthenticationAPI {
       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
     );
 
-    print("Profile Status: ${response.statusCode}");
-
     if (response.statusCode == 200) {
       return GetProfileModel.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
-      print(error);
       throw Exception(error["message"] ?? "Gagal mengambil profil");
     }
   }
 
+  // Get trainings
   static Future<GetListTrainingModel> getListTraining() async {
     final url = Uri.parse(Endpoint.training);
     final token = await PreferenceHandler.getToken();
@@ -146,6 +135,7 @@ class AuthenticationAPI {
     }
   }
 
+  // Get batches
   static Future<GetBatchesModel> getListBatch() async {
     final url = Uri.parse(Endpoint.batches);
     final token = await PreferenceHandler.getToken();
@@ -160,6 +150,60 @@ class AuthenticationAPI {
     } else {
       final error = json.decode(response.body);
       throw Exception(error["message"] ?? "Gagal mengambil data layanan");
+    }
+  }
+
+  // Forgot Password: request OTP
+
+  static Future<ResetPasswordModel> requestOtp({required String email}) async {
+    final url = Uri.parse(Endpoint.forgotPassword);
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"email": email}),
+    );
+
+    if (response.statusCode == 200) {
+      return ResetPasswordModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Gagal mengirim OTP");
+    }
+  }
+
+  // Reset Password
+
+  static Future<ResetPasswordModel> resetPassword({
+    required String email,
+    required String otp,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final url = Uri.parse(Endpoint.resetPassword);
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "email": email,
+        "otp": otp,
+        "password": password,
+        "password_confirmation": passwordConfirmation,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return ResetPasswordModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Gagal mereset password");
     }
   }
 }
