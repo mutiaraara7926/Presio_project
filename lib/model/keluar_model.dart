@@ -23,6 +23,8 @@ class AbsenCheckOutModel {
       );
 
   Map<String, dynamic> toJson() => {"message": message, "data": data?.toJson()};
+
+  void operator [](String other) {}
 }
 
 class Data {

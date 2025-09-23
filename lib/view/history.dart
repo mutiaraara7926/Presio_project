@@ -25,7 +25,8 @@ class _HistoryPageState extends State<HistoryPage> {
   DateTime? selectedDate;
 
   Datum? absenToday;
-  List<Datum> historyData = [];
+  List<Datum> historyData = []; // semua data absensi
+  List<Datum> dailyData = []; // data absensi per hari
 
   String selectedFilter = "hari";
 
@@ -64,7 +65,8 @@ class _HistoryPageState extends State<HistoryPage> {
       final result = await HistoryService.getHistory();
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
       setState(() {
-        historyData = (result.data ?? [])
+        historyData = result.data ?? [];
+        dailyData = historyData
             .where(
               (item) =>
                   DateFormat('yyyy-MM-dd').format(item.attendanceDate!) ==
@@ -76,7 +78,7 @@ class _HistoryPageState extends State<HistoryPage> {
     } catch (e) {
       debugPrint("Error fetch history by date: $e");
       setState(() {
-        historyData = [];
+        dailyData = [];
         isLoading = false;
       });
     }
@@ -329,7 +331,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildHistoryList() {
-    return historyData.isEmpty
+    return dailyData.isEmpty
         ? const Center(
             child: Text(
               "Tidak ada data absensi untuk tanggal ini",
@@ -338,9 +340,9 @@ class _HistoryPageState extends State<HistoryPage> {
           )
         : ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: historyData.length,
+            itemCount: dailyData.length,
             itemBuilder: (context, index) {
-              final absen = historyData[index];
+              final absen = dailyData[index];
               return _buildAbsenCard(absen);
             },
           );

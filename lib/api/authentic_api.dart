@@ -103,17 +103,20 @@ class AuthenticationAPI {
   static Future<GetProfileModel> getProfile() async {
     final url = Uri.parse(Endpoint.profile);
     final token = await PreferenceHandler.getToken();
-
+    print(token);
     final response = await http.get(
       url,
-      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+      headers: {
+        "Content-Type": "application/json",
+        // "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
     );
-
     if (response.statusCode == 200) {
       return GetProfileModel.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
-      throw Exception(error["message"] ?? "Gagal mengambil profil");
+      throw Exception(error["message"] ?? "Register gagal");
     }
   }
 

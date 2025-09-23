@@ -18,13 +18,9 @@ class AbsensiAPI {
     final token = prefs.getString("token");
 
     if (token == null) return {"message": "Token tidak ditemukan"};
-    // ambil waktu sekarang
+
     final now = DateTime.now();
-
-    // format tanggal (yyyy-MM-dd)
     final String attendanceDate = DateFormat('yyyy-MM-dd').format(now);
-
-    // format jam (HH:mm)
     final String checkInTime = DateFormat('HH:mm').format(now);
     try {
       final response = await http.post(
@@ -42,8 +38,20 @@ class AbsensiAPI {
           "check_in_address": "Jakarta",
         },
       );
-
-      return jsonDecode(response.body);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final result = jsonDecode(response.body);
+        if (result['success'] == true ||
+            result['message']?.contains('berhasil') == true) {
+          await PreferenceHandler.setCheckedInStatus(
+            true,
+            date: attendanceDate,
+          );
+          await PreferenceHandler.saveCheckIn(attendanceDate, checkInTime);
+        }
+        return result;
+      } else {
+        return {"message": "Check-in gagal: ${response.statusCode}"};
+      }
     } catch (e) {
       return {"message": "Error: $e"};
     }

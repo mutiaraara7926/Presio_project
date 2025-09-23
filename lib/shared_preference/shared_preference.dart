@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceHandler {
@@ -136,5 +137,43 @@ class PreferenceHandler {
     final time = prefs.getString(checkOutTimeKey);
     if (!isCheckedOut) return {};
     return {"date": date, "time": time};
+  }
+
+  static const String lastCheckInDateKey = "last_check_in_date";
+  static const String isCheckedInKey = "is_checked_in";
+
+  // Method untuk menyimpan status check-in
+  static Future<void> setCheckedInStatus(
+    bool isCheckedIn, {
+    String? date,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(isCheckedInKey, isCheckedIn);
+    if (date != null) {
+      await prefs.setString(lastCheckInDateKey, date);
+    }
+  }
+
+  // Method untuk mendapatkan status check-in
+  static Future<bool> getCheckedInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Cek apakah sudah check-in hari ini
+    final lastCheckInDate = prefs.getString(lastCheckInDateKey);
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Jika tanggal terakhir check-in bukan hari ini, reset status
+    if (lastCheckInDate != today) {
+      await setCheckedInStatus(false);
+      return false;
+    }
+
+    return prefs.getBool(isCheckedInKey) ?? false;
+  }
+
+  // Method untuk reset status check-in (saat logout atau hari baru)
+  static Future<void> resetCheckInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(isCheckedInKey, false);
   }
 }

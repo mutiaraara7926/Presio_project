@@ -29,6 +29,17 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadUserProfile();
   }
 
+  // Helper untuk bikin full URL foto
+  String? _getFullPhotoUrl(String? photo) {
+    if (photo == null || photo.isEmpty) return null;
+    if (photo.startsWith("http")) {
+      return photo;
+    } else {
+      final path = photo.startsWith('/') ? photo.substring(1) : photo;
+      return "$baseUrl/$path";
+    }
+  }
+
   Future<void> _loadUserProfile() async {
     setState(() => isLoading = true);
     try {
@@ -37,22 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       setState(() {
         userName = name;
-        final profilePhoto = profile.data?.profilePhoto;
-
-        if (profilePhoto != null) {
-          if (profilePhoto.startsWith("http")) {
-            _networkImageUrl = profilePhoto;
-          } else {
-            // Tambahkan slash jika tidak ada
-            final path = profilePhoto.startsWith('/')
-                ? profilePhoto.substring(1)
-                : profilePhoto;
-            _networkImageUrl = "$baseUrl/$path";
-          }
-        } else {
-          _networkImageUrl = null;
-        }
-
+        _networkImageUrl = _getFullPhotoUrl(profile.data?.profilePhoto);
         isLoading = false;
       });
     } catch (e) {
@@ -73,18 +69,8 @@ class _ProfilePageState extends State<ProfilePage> {
       // Upload ke server
       try {
         final result = await ProfileAPI.updateProfilePhoto(image: _image);
-        final profilePhoto = result.data?.profilePhoto;
-
-        if (profilePhoto != null) {
-          if (profilePhoto.startsWith("http")) {
-            setState(() => _networkImageUrl = profilePhoto);
-          } else {
-            final path = profilePhoto.startsWith('/')
-                ? profilePhoto.substring(1)
-                : profilePhoto;
-            setState(() => _networkImageUrl = "$baseUrl/$path");
-          }
-        }
+        _networkImageUrl = _getFullPhotoUrl(result.data?.profilePhoto);
+        setState(() {});
       } catch (e) {
         print("Error upload photo: $e");
       }

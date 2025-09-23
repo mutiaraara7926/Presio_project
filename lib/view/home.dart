@@ -71,7 +71,12 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey, // background lembut
+                  color: const Color.fromARGB(
+                    255,
+                    221,
+                    212,
+                    212,
+                  ), // background lembut
                   borderRadius: BorderRadius.circular(20), // sudut membulat
                   boxShadow: [
                     BoxShadow(
