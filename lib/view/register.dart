@@ -148,7 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               pickedFile != null
                   ? CircleAvatar(
@@ -174,30 +174,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               SizedBox(height: 32),
-              Padding(
-                padding: const EdgeInsets.only(right: 310),
-                child: Text("Nama", style: TextStyle(fontSize: 16)),
-              ),
+              Text("Nama", style: TextStyle(fontSize: 16)),
               SizedBox(height: 10),
               TextField(
                 controller: nameController,
                 decoration: _inputDecoration("Masukkan Nama"),
               ),
               SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.only(right: 310),
-                child: Text("Email", style: TextStyle(fontSize: 16)),
-              ),
+              Text("Email", style: TextStyle(fontSize: 16)),
+
               SizedBox(height: 10),
               TextField(
                 controller: emailController,
                 decoration: _inputDecoration("Masukkan Email"),
               ),
               SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.only(right: 280),
-                child: Text("Password", style: TextStyle(fontSize: 16)),
-              ),
+
+              Text("Password", style: TextStyle(fontSize: 16)),
+
               SizedBox(height: 10),
               TextField(
                 controller: passController,
@@ -225,7 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Text("Jenis Kelamin", style: TextStyle(fontSize: 16)),
                         SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          initialValue: selectedGender,
+                          value: selectedGender,
                           items: genderList
                               .map(
                                 (g) =>
@@ -248,7 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Text("Pilih Batch", style: TextStyle(fontSize: 16)),
                         SizedBox(height: 8),
                         DropdownButtonFormField<Batches>(
-                          initialValue: selectedBatch,
+                          value: selectedBatch,
                           items: batchList
                               .map(
                                 (b) => DropdownMenuItem(
@@ -268,13 +262,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
 
               SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.only(right: 250),
-                child: Text("Pilih Pelatihan", style: TextStyle(fontSize: 16)),
-              ),
+
+              Text("Pilih Pelatihan", style: TextStyle(fontSize: 16)),
+
               SizedBox(height: 10),
               DropdownButtonFormField<Datum>(
-                initialValue: selectedTraining,
+                value: selectedTraining,
                 items: trainingList
                     .map(
                       (t) => DropdownMenuItem(

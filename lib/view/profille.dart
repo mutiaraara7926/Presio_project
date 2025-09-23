@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:absensi/api/profile.dart';
+import 'package:absensi/model/get_profile.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:absensi/view/edit_profille.dart';
 import 'package:absensi/view/page_awal.dart';
@@ -8,37 +7,27 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final GetUser? userData;
+  const ProfilePage({super.key, this.userData});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  File? _image;
-  String? _networkImageUrl;
   bool isLoading = true;
   String? userName;
-
+  GetUser? _user;
   // Base URL server untuk path relatif
-  final String baseUrl = "https://appabsensi.mobileprojp.com";
 
   @override
   void initState() {
     super.initState();
+    _user = widget.userData;
     _loadUserProfile();
   }
 
   // Helper untuk bikin full URL foto
-  String? _getFullPhotoUrl(String? photo) {
-    if (photo == null || photo.isEmpty) return null;
-    if (photo.startsWith("http")) {
-      return photo;
-    } else {
-      final path = photo.startsWith('/') ? photo.substring(1) : photo;
-      return "$baseUrl/$path";
-    }
-  }
 
   Future<void> _loadUserProfile() async {
     setState(() => isLoading = true);
@@ -48,7 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       setState(() {
         userName = name;
-        _networkImageUrl = _getFullPhotoUrl(profile.data?.profilePhoto);
+        _user = profile;
         isLoading = false;
       });
     } catch (e) {
@@ -62,14 +51,10 @@ class _ProfilePageState extends State<ProfilePage> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+      setState(() {});
 
       // Upload ke server
       try {
-        final result = await ProfileAPI.updateProfilePhoto(image: _image);
-        _networkImageUrl = _getFullPhotoUrl(result.data?.profilePhoto);
         setState(() {});
       } catch (e) {
         print("Error upload photo: $e");
@@ -96,19 +81,19 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 20),
 
             // Foto Profil
-            GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 55,
-                backgroundColor: Colors.white,
-                backgroundImage: _image != null
-                    ? FileImage(_image!)
-                    : (_networkImageUrl != null
-                          ? NetworkImage(_networkImageUrl!)
-                          : null),
-                child: (_image == null && _networkImageUrl == null)
-                    ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
-                    : null,
+            ClipOval(
+              child: SizedBox(
+                width: 110, // lebar maksimum (adjust sesuai kebutuhan)
+                height: 110, // tinggi maksimum
+                child: (_user?.data?.profilePhotoUrl?.isNotEmpty ?? false)
+                    ? Image.network(
+                        _user!.data!.profilePhotoUrl!,
+                        fit: BoxFit.cover, // supaya proporsional
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildDefaultAvatar();
+                        },
+                      )
+                    : _buildDefaultAvatar(),
               ),
             ),
 
@@ -208,13 +193,16 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         title: const Text("Pengaturan Akun"),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const EditProfileScreen(),
+                              builder: (_) => const EditProfileScreen(),
                             ),
                           );
+
+                          // ambil ulang data user dari API
+                          _loadUserProfile();
                         },
                       ),
                     ),
@@ -289,4 +277,19 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+}
+
+Widget _buildDefaultAvatar() {
+  return Container(
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      gradient: LinearGradient(
+        colors: [
+          const Color(0xFF667eea).withOpacity(0.3),
+          const Color(0xFF764ba2).withOpacity(0.3),
+        ],
+      ),
+    ),
+    child: const Icon(Icons.person, size: 32, color: Colors.white),
+  );
 }

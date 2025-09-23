@@ -7,6 +7,7 @@ import 'package:absensi/model/get_list_training_model.dart';
 import 'package:absensi/model/get_profile.dart';
 import 'package:absensi/model/login_model.dart' show LoginModel;
 import 'package:absensi/model/put_profile_model.dart';
+import 'package:absensi/model/put_profile_photo.dart';
 import 'package:absensi/model/register_model.dart';
 import 'package:absensi/model/reset_password.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
@@ -99,8 +100,36 @@ class AuthenticationAPI {
     }
   }
 
+  static Future<PutProfilePhotoModel?> updateProfilePhoto({
+    required String token,
+    required String base64Photo,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse(Endpoint.editProfilePhoto),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token", // kalau pakai JWT / sanctum
+        },
+        body: jsonEncode({"profile_photo": base64Photo}),
+      );
+
+      if (response.statusCode == 200) {
+        return putProfilePhotoModelFromJson(response.body);
+      } else {
+        print("❌ Gagal update foto. Status: ${response.statusCode}");
+        print("❌ Body: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("❌ Error update foto: $e");
+      return null;
+    }
+  }
+
   // Get profile
-  static Future<GetProfileModel> getProfile() async {
+  static Future<GetUser> getProfile() async {
     final url = Uri.parse(Endpoint.profile);
     final token = await PreferenceHandler.getToken();
     print(token);
@@ -113,7 +142,7 @@ class AuthenticationAPI {
       },
     );
     if (response.statusCode == 200) {
-      return GetProfileModel.fromJson(json.decode(response.body));
+      return GetUser.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
       throw Exception(error["message"] ?? "Register gagal");

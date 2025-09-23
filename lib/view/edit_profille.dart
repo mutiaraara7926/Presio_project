@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:absensi/api/authentic_api.dart';
+import 'package:absensi/model/put_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
-
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
@@ -41,36 +43,80 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+
+      // preview dulu
       setState(() {
-        _profileImage = File(picked.path);
+        _profileImage = file;
       });
+
+      // ambil token dari SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token") ?? "";
+
+      // convert ke base64
+      final bytes = await file.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // upload ke API
+      final result = await AuthenticationAPI.updateProfilePhoto(
+        token: token,
+        base64Photo: base64Image,
+      );
+
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Foto berhasil diupdate")),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("❌ Gagal upload foto")));
+      }
     }
   }
 
   Future<void> _saveChanges() async {
     setState(() => isLoading = true);
     try {
-      final updatedUser = await AuthenticationAPI.updateProfile(
+      PutProfileModel? updatedUser = await AuthenticationAPI.updateProfile(
         name: _nameController.text,
         email: _emailController.text,
-        // tambahkan juga parameter profilePhoto kalau API kamu mendukung update foto
-        // profilePhoto: _profileImage,
       );
 
       setState(() => isLoading = false);
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully")),
       );
-
-      Navigator.pop(context, updatedUser);
+      Navigator.pop(context, updatedUser); // balik ke profile dengan data baru
     } catch (e) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Failed to update profile: $e")));
+    }
+  }
+
+  Future<void> pickAndUploadPhoto(String token) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final bytes = await File(pickedFile.path).readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      final result = await AuthenticationAPI.updateProfilePhoto(
+        token: token,
+        base64Photo: base64Image,
+      );
+
+      if (result != null) {
+        print("✅ Foto berhasil diupdate: ${result.data?.profilePhoto}");
+      }
     }
   }
 

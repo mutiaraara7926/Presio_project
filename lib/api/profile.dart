@@ -9,17 +9,35 @@ import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:http/http.dart' as http;
 
 class ProfileAPI {
-  static Future<PutProfileModel> updateProfile({required String name}) async {
+  static Future<PutProfileModel> updateProfile({
+    required String name,
+    required String email,
+    required File? imageFile,
+  }) async {
     final url = Uri.parse(Endpoint.profile);
     final token = await PreferenceHandler.getToken();
 
     print("Update Profile URL: $url");
     print("Update Profile Data: {name: $name}");
+    String? base64Image;
+    if (imageFile != null) {
+      final bytes = await imageFile.readAsBytes();
+      base64Image = base64Encode(bytes);
+    }
 
+    final body = jsonEncode({
+      "name": name,
+      "email": email,
+      "profile_photo": base64Image, // dikirim dalam base64
+    });
     final response = await http.put(
       url,
-      body: {"name": name},
-      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: body,
     );
 
     print("Update Profile Response: ${response.statusCode}");
@@ -68,7 +86,7 @@ class ProfileAPI {
     }
   }
 
-  static Future<GetProfileModel> getProfile() async {
+  static Future<GetUser> getProfile() async {
     final url = Uri.parse(Endpoint.profile);
     final token = await PreferenceHandler.getToken();
 
@@ -80,7 +98,7 @@ class ProfileAPI {
     print("Profile Status: ${response.statusCode}");
 
     if (response.statusCode == 200) {
-      return GetProfileModel.fromJson(json.decode(response.body));
+      return GetUser.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
       print(error);

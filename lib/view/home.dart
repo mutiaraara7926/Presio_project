@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  GetProfileModel? user; // simpan nama user
+  GetUser? user; // simpan nama user
   bool isLoading = true;
   String userName = "";
   String? errorMessage;
