@@ -29,7 +29,21 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
   void initState() {
     super.initState();
     // _loadCheckInStatus();
+    _loadAbsenToday();
     _getCurrentLocation();
+  }
+
+  Future<void> _loadAbsenToday() async {
+    final result = await AbsensiAPI.getAbsenToday();
+    if (result != null && result.data != null) {
+      setState(() {
+        checkInDate = DateFormat(
+          'dd MMMM yyyy',
+        ).format(result.data!.attendanceDate!);
+        checkInTime = result.data!.checkInTime;
+        isCheckedIn = result.data!.checkInTime != null;
+      });
+    }
   }
 
   Future<void> _loadCheckInStatus() async {
@@ -50,28 +64,59 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
     final date = DateFormat('dd MMMM yyyy').format(now);
     final time = DateFormat('HH:mm:ss').format(now);
 
-    setState(() {
-      checkInDate = date;
-      checkInTime = time;
-      isCheckedIn = true;
-    });
-
-    // Simpan ke SharedPreferences
-    await PreferenceHandler.saveCheckIn(date, time);
-
     final result = await AbsensiAPI.checkIn(
       lat: _currentPosition.latitude,
       lng: _currentPosition.longitude,
       address: _currentAddress,
     );
 
-    _showResultDialog(
-      title: "Check In",
-      message: result?["message"] ?? "Terjadi kesalahan",
-      date: date,
-      time: time,
-    );
+    if (result != null) {
+      _showResultDialog(
+        title: "Check In",
+        message: "Check-in berhasil",
+        date: date,
+        time: time,
+      );
+      await _loadAbsenToday(); // refresh status dari API
+    } else {
+      _showResultDialog(
+        title: "Check In",
+        message: "Terjadi kesalahan",
+        date: date,
+        time: time,
+      );
+    }
   }
+
+  // Future<void> _handleCheckIn() async {
+  //   await _getCurrentLocation();
+
+  //   final now = DateTime.now();
+  //   final date = DateFormat('dd MMMM yyyy').format(now);
+  //   final time = DateFormat('HH:mm:ss').format(now);
+
+  //   setState(() {
+  //     checkInDate = date;
+  //     checkInTime = time;
+  //     isCheckedIn = true;
+  //   });
+
+  //   // Simpan ke SharedPreferences
+  //   await PreferenceHandler.saveCheckIn(date, time);
+
+  //   final result = await AbsensiAPI.checkIn(
+  //     lat: _currentPosition.latitude,
+  //     lng: _currentPosition.longitude,
+  //     address: _currentAddress,
+  //   );
+
+  //   _showResultDialog(
+  //     title: "Check In",
+  //     message: result?["message"] ?? "Terjadi kesalahan",
+  //     date: date,
+  //     time: time,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {

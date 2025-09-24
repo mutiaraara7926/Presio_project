@@ -21,11 +21,24 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = true;
   String userName = "";
   String? errorMessage;
+  String? checkOutTime;
+  bool isCheckedOut = false;
+
+  Future<void> _loadAbsenToday() async {
+    final today = await AbsensiAPI.getAbsenToday();
+    if (today != null && today.data != null) {
+      setState(() {
+        checkOutTime = today.data!.checkOutTime;
+        isCheckedOut = today.data!.checkOutTime != null;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadAbsenToday();
   }
 
   void _loadUserData() async {
@@ -268,10 +281,6 @@ class _HomePageState extends State<HomePage> {
     final formattedTime = DateFormat('HH:mm').format(now);
     final formattedDate = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
 
-    // cek status check-out
-    final checkOutData = await PreferenceHandler.getCheckOut();
-    bool isCheckedOut = checkOutData.isNotEmpty;
-
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -297,7 +306,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20),
 
-              // jika sudah check-out tampilkan container, kalau belum tampilkan slide
+              // cek status dari API, bukan SharedPreferences
               isCheckedOut
                   ? Container(
                       width: double.infinity,
@@ -328,7 +337,6 @@ class _HomePageState extends State<HomePage> {
                         Navigator.pop(context); // tutup dialog
 
                         try {
-                          // ambil lokasi user
                           Position position =
                               await Geolocator.getCurrentPosition(
                                 desiredAccuracy: LocationAccuracy.high,
@@ -338,19 +346,13 @@ class _HomePageState extends State<HomePage> {
                           double lng = position.longitude;
                           String location = "$lat, $lng";
                           String address =
-                              "Lokasi saat ini"; // bisa diganti pakai geocoding
+                              "Lokasi saat ini"; // bisa pakai geocoding
 
                           final result = await AbsensiAPI.checkOut(
                             checkOutLat: lat,
                             checkOutLng: lng,
                             checkOutLocation: location,
                             checkOutAddress: address,
-                          );
-
-                          // simpan status ke SharedPreferences
-                          await PreferenceHandler.saveCheckOut(
-                            formattedDate,
-                            formattedTime,
                           );
 
                           if (result != null && result.message != null) {
@@ -360,6 +362,7 @@ class _HomePageState extends State<HomePage> {
                                 backgroundColor: Colors.green,
                               ),
                             );
+                            await _loadAbsenToday(); // refresh status dari API
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -386,4 +389,128 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  //   void _showCheckOutDialog(BuildContext context) async {
+  //     final now = DateTime.now();
+  //     final formattedTime = DateFormat('HH:mm').format(now);
+  //     final formattedDate = DateFormat('EEEE, dd MMMM yyyy', 'id').format(now);
+
+  //     // cek status check-out
+  //     final checkOutData = await PreferenceHandler.getCheckOut();
+  //     bool isCheckedOut = checkOutData.isNotEmpty;
+
+  //     showDialog(
+  //       context: context,
+  //       builder: (context) => Dialog(
+  //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(20),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               const Icon(Icons.access_time, size: 50, color: Colors.red),
+  //               const SizedBox(height: 16),
+  //               const Text(
+  //                 "Konfirmasi Check Out",
+  //                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //               ),
+  //               const SizedBox(height: 12),
+  //               Text("Jam: $formattedTime"),
+  //               Text("Tanggal: $formattedDate"),
+  //               const SizedBox(height: 16),
+  //               const Text(
+  //                 "Apakah kamu yakin ingin Check Out sekarang?",
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //               const SizedBox(height: 20),
+
+  //               // jika sudah check-out tampilkan container, kalau belum tampilkan slide
+  //               isCheckedOut
+  //                   ? Container(
+  //                       width: double.infinity,
+  //                       height: 60,
+  //                       alignment: Alignment.center,
+  //                       decoration: BoxDecoration(
+  //                         color: Colors.redAccent,
+  //                         borderRadius: BorderRadius.circular(8),
+  //                       ),
+  //                       child: const Text(
+  //                         "Sudah Check Out",
+  //                         style: TextStyle(
+  //                           color: Colors.white,
+  //                           fontWeight: FontWeight.bold,
+  //                           fontSize: 16,
+  //                         ),
+  //                       ),
+  //                     )
+  //                   : SlideAction(
+  //                       text: "Swipe untuk Check Out",
+  //                       outerColor: Colors.redAccent,
+  //                       innerColor: Colors.white,
+  //                       textStyle: const TextStyle(
+  //                         color: Colors.white,
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                       onSubmit: () async {
+  //                         Navigator.pop(context); // tutup dialog
+
+  //                         try {
+  //                           // ambil lokasi user
+  //                           Position position =
+  //                               await Geolocator.getCurrentPosition(
+  //                                 desiredAccuracy: LocationAccuracy.high,
+  //                               );
+
+  //                           double lat = position.latitude;
+  //                           double lng = position.longitude;
+  //                           String location = "$lat, $lng";
+  //                           String address =
+  //                               "Lokasi saat ini"; // bisa diganti pakai geocoding
+
+  //                           final result = await AbsensiAPI.checkOut(
+  //                             checkOutLat: lat,
+  //                             checkOutLng: lng,
+  //                             checkOutLocation: location,
+  //                             checkOutAddress: address,
+  //                           );
+
+  //                           // simpan status ke SharedPreferences
+  //                           await PreferenceHandler.saveCheckOut(
+  //                             formattedDate,
+  //                             formattedTime,
+  //                           );
+
+  //                           if (result != null && result.message != null) {
+  //                             ScaffoldMessenger.of(context).showSnackBar(
+  //                               SnackBar(
+  //                                 content: Text(result.message!),
+  //                                 backgroundColor: Colors.green,
+  //                               ),
+  //                             );
+  //                           } else {
+  //                             ScaffoldMessenger.of(context).showSnackBar(
+  //                               const SnackBar(
+  //                                 content: Text("Check Out gagal, coba lagi."),
+  //                                 backgroundColor: Colors.red,
+  //                               ),
+  //                             );
+  //                           }
+  //                         } catch (e) {
+  //                           ScaffoldMessenger.of(context).showSnackBar(
+  //                             SnackBar(
+  //                               content: Text("Error: $e"),
+  //                               backgroundColor: Colors.red,
+  //                             ),
+  //                           );
+  //                         }
+
+  //                         return null;
+  //                       },
+  //                     ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   }
 }

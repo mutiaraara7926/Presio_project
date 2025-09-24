@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:absensi/api/endpoint/endpoint.dart';
+import 'package:absensi/model/get_absen_today.dart';
 import 'package:absensi/model/keluar_model.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:http/http.dart' as http;
@@ -132,13 +133,21 @@ class AbsensiAPI {
   // }
 
   /// Get Absen Today
-
-  static Future<Map<String, dynamic>?> getAbsenToday() async {
+  static Future<GetAbsenToday?> getAbsenToday() async {
     try {
-      final response = await http.get(Uri.parse(Endpoint.absenToday));
+      final token = await PreferenceHandler.getToken();
+
+      final response = await http.get(
+        Uri.parse(Endpoint.absenToday),
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final jsonResponse = jsonDecode(response.body);
+        return GetAbsenToday.fromJson(jsonResponse);
       } else {
         print("Gagal load absen today: ${response.body}");
         return null;
