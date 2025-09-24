@@ -392,7 +392,7 @@ class _HistoryPageState extends State<HistoryPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Check In",
+                "Masuk",
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(height: 4),
@@ -405,7 +405,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                absen.checkInAddress ?? "-",
+                "-",
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
             ],
@@ -414,7 +414,7 @@ class _HistoryPageState extends State<HistoryPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               const Text(
-                "Check Out",
+                "Pulang",
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(height: 4),
@@ -428,7 +428,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                absen.checkOutAddress ?? "-",
+                "-",
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
               ),
             ],

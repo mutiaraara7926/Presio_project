@@ -223,7 +223,7 @@ class _HomePageState extends State<HomePage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Text(
-                                  "Check In",
+                                  "Masuk",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -254,7 +254,7 @@ class _HomePageState extends State<HomePage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Text(
-                                  "Check Out",
+                                  "Pulang",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -293,7 +293,7 @@ class _HomePageState extends State<HomePage> {
               const Icon(Icons.access_time, size: 50, color: Colors.red),
               const SizedBox(height: 16),
               const Text(
-                "Konfirmasi Check Out",
+                "Konfirmasi Pulang",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
@@ -301,7 +301,7 @@ class _HomePageState extends State<HomePage> {
               Text("Tanggal: $formattedDate"),
               const SizedBox(height: 16),
               const Text(
-                "Apakah kamu yakin ingin Check Out sekarang?",
+                "Apakah kamu yakin ingin pulang sekarang?",
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -317,7 +317,7 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
-                        "Sudah Check Out",
+                        "Sudah Pulang",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -326,7 +326,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     )
                   : SlideAction(
-                      text: "Swipe untuk Check Out",
+                      text: "Geser",
                       outerColor: Colors.redAccent,
                       innerColor: Colors.white,
                       textStyle: const TextStyle(
@@ -334,7 +334,7 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.bold,
                       ),
                       onSubmit: () async {
-                        Navigator.pop(context); // tutup dialog
+                        Navigator.pop(context);
 
                         try {
                           Position position =
@@ -345,8 +345,7 @@ class _HomePageState extends State<HomePage> {
                           double lat = position.latitude;
                           double lng = position.longitude;
                           String location = "$lat, $lng";
-                          String address =
-                              "Lokasi saat ini"; // bisa pakai geocoding
+                          String address = "Lokasi saat ini";
 
                           final result = await AbsensiAPI.checkOut(
                             checkOutLat: lat,
@@ -362,11 +361,11 @@ class _HomePageState extends State<HomePage> {
                                 backgroundColor: Colors.green,
                               ),
                             );
-                            await _loadAbsenToday(); // refresh status dari API
+                            await _loadAbsenToday();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Check Out gagal, coba lagi."),
+                                content: Text("Gagal, coba lagi."),
                                 backgroundColor: Colors.red,
                               ),
                             );

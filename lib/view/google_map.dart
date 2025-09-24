@@ -72,15 +72,15 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
 
     if (result != null) {
       _showResultDialog(
-        title: "Check In",
-        message: "Check-in berhasil",
+        title: "Masuk",
+        message: "Berhasil",
         date: date,
         time: time,
       );
-      await _loadAbsenToday(); // refresh status dari API
+      await _loadAbsenToday();
     } else {
       _showResultDialog(
-        title: "Check In",
+        title: "Masuk",
         message: "Terjadi kesalahan",
         date: date,
         time: time,
@@ -178,7 +178,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                   /// Info Check In
                   if (checkInTime != null && checkInDate != null) ...[
                     Text(
-                      "Check In pada:",
+                      "Absen pada:",
                       style: const TextStyle(color: Colors.black54),
                     ),
                     Text(
@@ -202,7 +202,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
-                            "Sudah Check In",
+                            "Sudah Masuk",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -211,7 +211,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
                           ),
                         )
                       : SlideAction(
-                          text: "Geser untuk Check In",
+                          text: "Geser ",
                           textStyle: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
