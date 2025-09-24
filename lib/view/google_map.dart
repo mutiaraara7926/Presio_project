@@ -28,7 +28,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadCheckInStatus();
+    // _loadCheckInStatus();
     _getCurrentLocation();
   }
 
@@ -36,7 +36,7 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
     final checkInData = await PreferenceHandler.getCheckIn();
     if (checkInData.isNotEmpty) {
       setState(() {
-        isCheckedIn = true;
+        // isCheckedIn = true;
         checkInDate = checkInData["date"];
         checkInTime = checkInData["time"];
       });
