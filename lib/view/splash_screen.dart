@@ -4,8 +4,8 @@
 // import 'package:absensi/view/login.dart';
 import 'package:absensi/extensions/navigation.dart';
 import 'package:absensi/shared_preference/shared_preference.dart';
-import 'package:absensi/view/home.dart';
 import 'package:absensi/view/login.dart';
+import 'package:absensi/widgets/botnavbar.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,12 +24,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void isLogin() async {
-    bool? isLogin = await PreferenceHandler.getLogin();
+    bool? isLogin = await PreferenceHandlerAsli.getLogin();
 
     Future.delayed(Duration(seconds: 3)).then((value) async {
       print(isLogin);
       if (isLogin == true) {
-        context.pushReplacement(HomePage());
+        context.pushReplacement(Botnavbar());
       } else {
         context.push(Login());
       }

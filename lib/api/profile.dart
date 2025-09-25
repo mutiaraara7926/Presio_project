@@ -15,7 +15,7 @@ class ProfileAPI {
     required File? imageFile,
   }) async {
     final url = Uri.parse(Endpoint.profile);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
 
     print("Update Profile URL: $url");
     print("Update Profile Data: {name: $name}");
@@ -56,7 +56,7 @@ class ProfileAPI {
 
   static Future<PutProfilePhotoModel> updateProfilePhoto({File? image}) async {
     final url = Uri.parse(Endpoint.editProfilePhoto);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
     String imageBase64 = "";
     if (image != null) {
       final bytes = await image.readAsBytes();
@@ -88,7 +88,7 @@ class ProfileAPI {
 
   static Future<GetUser> getProfile() async {
     final url = Uri.parse(Endpoint.profile);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
 
     final response = await http.get(
       url,

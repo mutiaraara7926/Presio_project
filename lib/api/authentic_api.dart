@@ -56,22 +56,32 @@ class AuthenticationAPI {
   }
 
   // Login
+  /// LOGIN USER
   static Future<LoginModel> loginUser({
     required String email,
     required String password,
   }) async {
     final url = Uri.parse(Endpoint.login);
+
     final response = await http.post(
       url,
-      body: {"email": email, "password": password},
       headers: {"Accept": "application/json"},
+      body: {"email": email, "password": password},
     );
 
+    final result = json.decode(response.body);
     if (response.statusCode == 200) {
-      return LoginModel.fromJson(json.decode(response.body));
+      final data = LoginModel.fromJson(result);
+
+      // ✅ Simpan token
+      if (data.data?.token != null) {
+        await PreferenceHandlerAsli.saveToken(data.data!.token!);
+      }
+      await PreferenceHandlerAsli.saveLogin();
+
+      return data;
     } else {
-      final error = json.decode(response.body);
-      throw Exception(error["message"] ?? "Login gagal");
+      throw Exception(result["message"] ?? "Login gagal");
     }
   }
 
@@ -81,7 +91,7 @@ class AuthenticationAPI {
     required String email,
   }) async {
     final url = Uri.parse(Endpoint.profile);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
 
     final response = await http.put(
       url,
@@ -131,7 +141,7 @@ class AuthenticationAPI {
   // Get profile
   static Future<GetUser> getProfile() async {
     final url = Uri.parse(Endpoint.profile);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
     print(token);
     final response = await http.get(
       url,
@@ -152,7 +162,7 @@ class AuthenticationAPI {
   // Get trainings
   static Future<GetListTrainingModel> getListTraining() async {
     final url = Uri.parse(Endpoint.training);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
 
     final response = await http.get(
       url,
@@ -170,7 +180,7 @@ class AuthenticationAPI {
   // Get batches
   static Future<GetBatchesModel> getListBatch() async {
     final url = Uri.parse(Endpoint.batches);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
 
     final response = await http.get(
       url,

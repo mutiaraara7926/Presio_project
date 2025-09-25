@@ -1,13 +1,18 @@
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PreferenceHandler {
+class PreferenceHandlerAsli {
   static const String tokenKey = "token";
   static const String userIdKey = "user_id";
   static const String userEmailKey = "user_email";
   static const String userNameKey = "user_name";
   static const String batchKey = "batch";
   static const String loginKey = "login";
+
+  static Future<void> saveLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(loginKey, true);
+  }
 
   static Future<void> saveUserData(
     String token,
@@ -25,7 +30,7 @@ class PreferenceHandler {
     await prefs.setBool(loginKey, true);
   }
 
-  static void saveToken(String token) async {
+  static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(tokenKey, token);
   }

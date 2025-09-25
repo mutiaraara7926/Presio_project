@@ -199,7 +199,8 @@ class _HistoryPageState extends State<HistoryPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xff8A2D3B),
+        backgroundColor:
+            Colors.transparent, // transparan biar gradient keliatan
         centerTitle: true,
         title: const Text(
           "Absensi",
@@ -207,6 +208,18 @@ class _HistoryPageState extends State<HistoryPage> {
             fontWeight: FontWeight.bold,
             fontSize: 30,
             color: Color.fromARGB(255, 238, 211, 211),
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 77, 27, 44), // Maroon tua
+                Color(0xFFD32F2F), // Merah muda
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
         actions: [
@@ -228,6 +241,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
         ],
       ),
+
       body: Column(
         children: [
           Container(
@@ -375,6 +389,12 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildAbsenCard(Datum absen) {
+    // ✅ Tambahin format tanggal
+    String tanggal = "-";
+    if (absen.attendanceDate != null) {
+      tanggal = DateFormat("dd MMM yyyy").format(absen.attendanceDate!);
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -385,51 +405,59 @@ class _HistoryPageState extends State<HistoryPage> {
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Masuk",
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+          Center(
+            child: Text(
+              tanggal,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-              const SizedBox(height: 4),
-              Text(
-                absen.checkInTime ?? "-",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "-",
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-            ],
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+
+          const SizedBox(height: 8),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Pulang",
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Masuk",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    absen.checkInTime ?? "-",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                absen.checkOutTime ?? "-",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepOrange,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "-",
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    "Pulang",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    absen.checkOutTime ?? "-",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

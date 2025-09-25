@@ -43,11 +43,11 @@ class AbsensiAPI {
         final result = jsonDecode(response.body);
         if (result['success'] == true ||
             result['message']?.contains('berhasil') == true) {
-          await PreferenceHandler.setCheckedInStatus(
+          await PreferenceHandlerAsli.setCheckedInStatus(
             true,
             date: attendanceDate,
           );
-          await PreferenceHandler.saveCheckIn(attendanceDate, checkInTime);
+          await PreferenceHandlerAsli.saveCheckIn(attendanceDate, checkInTime);
         }
         return result;
       } else {
@@ -66,7 +66,7 @@ class AbsensiAPI {
     required String checkOutAddress,
   }) async {
     try {
-      final token = await PreferenceHandler.getToken();
+      final token = await PreferenceHandlerAsli.getToken();
 
       final now = DateTime.now();
       final attendanceDate =
@@ -135,7 +135,7 @@ class AbsensiAPI {
   /// Get Absen Today
   static Future<GetAbsenToday?> getAbsenToday() async {
     try {
-      final token = await PreferenceHandler.getToken();
+      final token = await PreferenceHandlerAsli.getToken();
 
       final response = await http.get(
         Uri.parse(Endpoint.absenToday),

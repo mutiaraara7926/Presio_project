@@ -1,9 +1,7 @@
-import 'package:absensi/view/history.dart';
-import 'package:absensi/view/home.dart';
 import 'package:absensi/view/login.dart';
-import 'package:absensi/view/register.dart';
+import 'package:absensi/view/page_awal.dart';
 import 'package:absensi/view/splash_screen.dart';
-import 'package:absensi/widgets/autochek.dart';
+import 'package:absensi/widgets/botnavbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -27,15 +25,25 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      routes: {
-        '/splash_screen': (context) => const SplashScreen(),
-        '/login': (context) => const Login(),
-        '/register': (context) => const RegisterScreen(),
-        '/home': (context) => const HomePage(),
-        '/history': (context) => const HistoryPage(),
-      },
+      // routes: {
+      //   '/splash_screen': (context) => const SplashScreen(),
+      //   '/login': (context) => const Login(),
+      //   '/register': (context) => const RegisterScreen(),
+      //   '/home': (context) => const HomePage(),
+      //   '/history': (context) => const HistoryPage(),
+      // },
 
-      home: const AuthCheckPage(),
+      // home: PageAwal(),
+      initialRoute: SplashScreen.id,
+      routes: {
+        SplashScreen.id: (context) => SplashScreen(),
+        '/PageAwal': (context) => const PageAwal(),
+        '/login': (context) => const Login(),
+        '/BotNav': (context) => const Botnavbar(),
+        // '/register': (context) => const RegisterScreen(),
+        // '/home': (context) => const HomePage(),
+        // '/history': (context) => const HistoryPage(),
+      },
     );
   }
 }

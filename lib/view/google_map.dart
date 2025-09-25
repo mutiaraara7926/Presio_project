@@ -1,5 +1,4 @@
 import 'package:absensi/api/absensi.dart';
-import 'package:absensi/shared_preference/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -46,16 +45,16 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
     }
   }
 
-  Future<void> _loadCheckInStatus() async {
-    final checkInData = await PreferenceHandler.getCheckIn();
-    if (checkInData.isNotEmpty) {
-      setState(() {
-        // isCheckedIn = true;
-        checkInDate = checkInData["date"];
-        checkInTime = checkInData["time"];
-      });
-    }
-  }
+  // Future<void> _loadCheckInStatus() async {
+  //   final checkInData = await PreferenceHandler.getCheckIn();
+  //   if (checkInData.isNotEmpty) {
+  //     setState(() {
+  //       // isCheckedIn = true;
+  //       checkInDate = checkInData["date"];
+  //       checkInTime = checkInData["time"];
+  //     });
+  //   }
+  // }
 
   Future<void> _handleCheckIn() async {
     await _getCurrentLocation();

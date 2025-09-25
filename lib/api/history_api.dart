@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 class HistoryService {
   static Future<HistoryAbsenModel> getHistory() async {
     final url = Uri.parse(Endpoint.history);
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
 
     final response = await http.get(
       url,

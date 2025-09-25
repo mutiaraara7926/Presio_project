@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class PageAwal extends StatelessWidget {
   const PageAwal({super.key});
+  static const id = "/PageAwal";
 
   @override
   Widget build(BuildContext context) {

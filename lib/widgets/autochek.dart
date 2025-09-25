@@ -18,7 +18,7 @@ class _AuthCheckPageState extends State<AuthCheckPage> {
   }
 
   Future<void> _checkLoginStatus() async {
-    final token = await PreferenceHandler.getToken();
+    final token = await PreferenceHandlerAsli.getToken();
     if (mounted) {
       if (token != null && token.isNotEmpty) {
         Navigator.pushReplacement(

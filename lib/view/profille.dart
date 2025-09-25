@@ -32,7 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadUserProfile() async {
     setState(() => isLoading = true);
     try {
-      final name = await PreferenceHandler.getUserName();
+      final name = await PreferenceHandlerAsli.getUserName();
       final profile = await ProfileAPI.getProfile();
 
       setState(() {
@@ -63,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _logout() async {
-    await PreferenceHandler.clearAll();
+    await PreferenceHandlerAsli.clearAll();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const PageAwal()),
@@ -74,307 +74,378 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff8A2D3B),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+      // backgroundColor: const Color(0xff8A2D3B),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 71, 17, 25),
+              Color.fromARGB(255, 240, 63, 77),
+              Color.fromARGB(255, 255, 181, 207),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-            // Foto Profil
-            ClipOval(
-              child: SizedBox(
-                width: 110, // lebar maksimum (adjust sesuai kebutuhan)
-                height: 110, // tinggi maksimum
-                child: (_user?.data?.profilePhotoUrl?.isNotEmpty ?? false)
-                    ? Image.network(
-                        _user!.data!.profilePhotoUrl!,
-                        fit: BoxFit.cover, // supaya proporsional
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildDefaultAvatar();
-                        },
-                      )
-                    : _buildDefaultAvatar(),
-              ),
-            ),
-
-            const SizedBox(height: 15),
-
-            Text(
-              isLoading
-                  ? "Memuat data..."
-                  : (userName ?? "Nama tidak tersedia"),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
+              // Foto Profil
+              ClipOval(
+                child: SizedBox(
+                  width: 110, // lebar maksimum (adjust sesuai kebutuhan)
+                  height: 110, // tinggi maksimum
+                  child: (_user?.data?.profilePhotoUrl?.isNotEmpty ?? false)
+                      ? Image.network(
+                          _user!.data!.profilePhotoUrl!,
+                          fit: BoxFit.cover, // supaya proporsional
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildDefaultAvatar();
+                          },
+                        )
+                      : _buildDefaultAvatar(),
                 ),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  children: [
-                    // Tentang Aplikasi
-                    Card(
-                      color: Color(0xff8A2D3B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              title: const Text(
-                                "Tentang Aplikasi",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xff8A2D3B),
+              ),
+
+              const SizedBox(height: 15),
+
+              Text(
+                isLoading
+                    ? "Memuat data..."
+                    : (userName ?? "Nama tidak tersedia"),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    children: [
+                      // Tentang Aplikasi
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(15),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                              ),
-                              content: const Text(
-                                "Aplikasi absensi ini tidak hanya memudahkan pengguna untuk melakukan "
-                                "Check In dan Check Out berbasis lokasi secara real-time, tetapi juga menyediakan "
-                                "fitur riwayat absensi yang menampilkan catatan harian secara lengkap. Selain itu, aplikasi "
-                                "ini dilengkapi dengan fitur konversi absensi ke PDF, sehingga laporan kehadiran dapat disimpan "
-                                "atau dibagikan dengan lebih mudah. Dengan tampilan sederhana, informatif, dan user-friendly, aplikasi "
-                                "ini dirancang untuk membuat proses absensi menjadi lebih praktis, efisien, dan terdokumentasi dengan baik.",
-                                textAlign: TextAlign.justify,
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text(
-                                    "Tutup",
-                                    style: TextStyle(color: Color(0xff8A2D3B)),
+                                title: const Text(
+                                  "Tentang Aplikasi",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xff8A2D3B),
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.help_outline,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Tentang Aplikasi",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // kebijakan & privasi
-                    Card(
-                      color: Color(0xff8A2D3B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              title: const Text(
-                                "Kebijakan Aplikasi",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xff8A2D3B),
-                                ),
-                              ),
-                              content: const SingleChildScrollView(
-                                child: Text(
-                                  "Aplikasi absensi ini mengumpulkan dan menyimpan data kehadiran "
-                                  "hanya untuk keperluan pencatatan dan pelaporan. "
-                                  "Data tidak akan dibagikan kepada pihak ketiga tanpa izin pengguna. "
-                                  "Dengan menggunakan aplikasi ini, pengguna dianggap telah menyetujui "
-                                  "kebijakan privasi dan aturan penggunaan yang berlaku.",
+                                content: const Text(
+                                  "Aplikasi absensi ini tidak hanya memudahkan pengguna untuk melakukan "
+                                  "Check In dan Check Out berbasis lokasi secara real-time, tetapi juga menyediakan "
+                                  "fitur riwayat absensi yang menampilkan catatan harian secara lengkap. Selain itu, aplikasi "
+                                  "ini dilengkapi dengan fitur konversi absensi ke PDF, sehingga laporan kehadiran dapat disimpan "
+                                  "atau dibagikan dengan lebih mudah. Dengan tampilan sederhana, informatif, dan user-friendly, aplikasi "
+                                  "ini dirancang untuk membuat proses absensi menjadi lebih praktis, efisien, dan terdokumentasi dengan baik.",
                                   textAlign: TextAlign.justify,
                                 ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text(
+                                      "Tutup",
+                                      style: TextStyle(
+                                        color: Color(0xff8A2D3B),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  child: const Text(
-                                    "Mengerti",
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 77, 27, 44), // Maroon tua
+                                  Color(0xFFD32F2F), // Merah muda
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.help_outline,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Tentang Aplikasi",
                                     style: TextStyle(
-                                      color: Color(0xff8A2D3B),
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Kebijakan
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(15),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                title: const Text(
+                                  "Kebijakan Aplikasi",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xff8A2D3B),
+                                  ),
+                                ),
+                                content: const SingleChildScrollView(
+                                  child: Text(
+                                    "Aplikasi absensi ini mengumpulkan dan menyimpan data kehadiran "
+                                    "hanya untuk keperluan pencatatan dan pelaporan. "
+                                    "Data tidak akan dibagikan kepada pihak ketiga tanpa izin pengguna. "
+                                    "Dengan menggunakan aplikasi ini, pengguna dianggap telah menyetujui "
+                                    "kebijakan privasi dan aturan penggunaan yang berlaku.",
+                                    textAlign: TextAlign.justify,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text(
+                                      "Mengerti",
+                                      style: TextStyle(
+                                        color: Color(0xff8A2D3B),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 77, 27, 44), // Maroon tua
+                                  Color(0xFFD32F2F), // Merah muda
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.policy,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Kebijakan",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Pengaturan Akun
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(15),
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const EditProfileScreen(),
+                              ),
+                            );
+                            _loadUserProfile();
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 77, 27, 44), // Maroon tua
+                                  Color(0xFFD32F2F), // Merah muda
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.settings,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Pengaturan Akun",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Logout
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(15),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                title: const Text(
+                                  "Konfirmasi Logout",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xff8A2D3B),
+                                  ),
+                                ),
+                                content: const Text(
+                                  "Apakah kamu yakin ingin keluar?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text(
+                                      "Tidak",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      _logout();
+                                    },
+                                    child: const Text(
+                                      "Ya",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 77, 27, 44), // Maroon tua
+                                  Color(0xFFD32F2F), // Merah muda
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.logout,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    "Logout",
+                                    style: TextStyle(
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.policy, color: Colors.white, size: 40),
-                              SizedBox(height: 10),
-                              Text(
-                                "Kebijakan",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-
-                    // Pengaturan Akun
-                    Card(
-                      color: Color(0xff8A2D3B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const EditProfileScreen(),
-                            ),
-                          );
-                          _loadUserProfile();
-                        },
-                        child: const Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.settings,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Pengaturan Akun",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Logout
-                    Card(
-                      color: Color(0xff8A2D3B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              title: const Text(
-                                "Konfirmasi Logout",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xff8A2D3B),
-                                ),
-                              ),
-                              content: const Text(
-                                "Apakah kamu yakin ingin keluar?",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  child: const Text(
-                                    "Tidak",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(ctx);
-                                    _logout();
-                                  },
-                                  child: const Text(
-                                    "Ya",
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.logout, color: Colors.white, size: 40),
-                              SizedBox(height: 10),
-                              Text(
-                                "Logout",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

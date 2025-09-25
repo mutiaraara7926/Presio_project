@@ -80,7 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ).showSnackBar(const SnackBar(content: Text("Semua field wajib diisi")));
       return;
     }
-    PreferenceHandler.saveToken(user?.data?.token.toString() ?? "");
+    PreferenceHandlerAsli.saveToken(user?.data?.token.toString() ?? "");
 
     if (selectedGender == null ||
         selectedBatch == null ||
@@ -144,199 +144,206 @@ class _RegisterScreenState extends State<RegisterScreen> {
         centerTitle: true,
       ),
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              pickedFile != null
-                  ? CircleAvatar(
-                      radius: 50,
-                      backgroundImage: FileImage(File(pickedFile!.path)),
-                    )
-                  : CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey[200],
-                      child: const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
-                    ),
-              SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: pickFoto,
-                icon: Icon(Icons.camera_alt, color: Color(0xff8A2D3B)),
-                label: Text(
-                  "Pilih Foto Profil",
-                  style: TextStyle(color: Color(0xff8A2D3B), fontSize: 14),
-                ),
-              ),
-              SizedBox(height: 32),
-              Text("Nama", style: TextStyle(fontSize: 16)),
-              SizedBox(height: 10),
-              TextField(
-                controller: nameController,
-                decoration: _inputDecoration("Masukkan Nama"),
-              ),
-              SizedBox(height: 16),
-              Text("Email", style: TextStyle(fontSize: 16)),
-
-              SizedBox(height: 10),
-              TextField(
-                controller: emailController,
-                decoration: _inputDecoration("Masukkan Email"),
-              ),
-              SizedBox(height: 16),
-
-              Text("Password", style: TextStyle(fontSize: 16)),
-
-              SizedBox(height: 10),
-              TextField(
-                controller: passController,
-                obscureText: hidePassword,
-                decoration: _inputDecoration("Masukkan Password").copyWith(
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      hidePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () =>
-                        setState(() => hidePassword = !hidePassword),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              Row(
-                children: [
-                  // Jenis Kelamin
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Jenis Kelamin", style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: selectedGender,
-                          items: genderList
-                              .map(
-                                (g) =>
-                                    DropdownMenuItem(value: g, child: Text(g)),
-                              )
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedGender = val),
-                          decoration: _inputDecoration("Pilih "),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 16),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Pilih Batch", style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 8),
-                        DropdownButtonFormField<Batches>(
-                          value: selectedBatch,
-                          items: batchList
-                              .map(
-                                (b) => DropdownMenuItem(
-                                  value: b,
-                                  child: Text(b.batchKe ?? "Batch ${b.id}"),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedBatch = val),
-                          decoration: _inputDecoration("Pilih Batch"),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 16),
-
-              Text("Pilih Pelatihan", style: TextStyle(fontSize: 16)),
-
-              SizedBox(height: 10),
-              DropdownButtonFormField<Datum>(
-                value: selectedTraining,
-                items: trainingList
-                    .map(
-                      (t) => DropdownMenuItem(
-                        value: t,
-                        child: SizedBox(
-                          width: 220,
-                          child: Text(
-                            t.title ?? "Pelatihan ${t.id}",
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+      body: Container(
+        color: Colors.white,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: pickedFile != null
+                      ? CircleAvatar(
+                          radius: 50,
+                          backgroundImage: FileImage(File(pickedFile!.path)),
+                        )
+                      : CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[200],
+                          child: const Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey,
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => selectedTraining = val),
-                decoration: _inputDecoration("Pilih Pelatihan"),
-              ),
-              SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: isLoading ? null : registerUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff8A2D3B),
-                  minimumSize: Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                ),
+                SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: pickFoto,
+                  icon: Icon(Icons.camera_alt, color: Color(0xff8A2D3B)),
+                  label: Text(
+                    "Pilih Foto Profil",
+                    style: TextStyle(color: Color(0xff8A2D3B), fontSize: 14),
                   ),
                 ),
-                child: isLoading
-                    ? CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      )
-                    : Text(
-                        "Buat Akun",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-              ),
-              SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.only(left: 20),
-                child: Text.rich(
-                  TextSpan(
-                    text: "Sudah punya akun? ",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
-                    ),
+                SizedBox(height: 32),
+                Text("Nama", style: TextStyle(fontSize: 16)),
+                SizedBox(height: 10),
+                TextField(
+                  controller: nameController,
+                  decoration: _inputDecoration("Masukkan Nama"),
+                ),
+                SizedBox(height: 16),
+                Text("Email", style: TextStyle(fontSize: 16)),
 
-                    children: [
-                      TextSpan(
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            context.push(Login());
-                          },
-                        text: " Masuk",
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: const Color.fromARGB(255, 11, 39, 164),
-                          // fontFamily: "StageGrotesk_Bold",
-                          fontWeight: FontWeight.bold,
-                        ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: emailController,
+                  decoration: _inputDecoration("Masukkan Email"),
+                ),
+                SizedBox(height: 16),
+
+                Text("Password", style: TextStyle(fontSize: 16)),
+
+                SizedBox(height: 10),
+                TextField(
+                  controller: passController,
+                  obscureText: hidePassword,
+                  decoration: _inputDecoration("Masukkan Password").copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        hidePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
                       ),
-                    ],
+                      onPressed: () =>
+                          setState(() => hidePassword = !hidePassword),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-            ],
+                SizedBox(height: 16),
+
+                Row(
+                  children: [
+                    // Jenis Kelamin
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Jenis Kelamin", style: TextStyle(fontSize: 16)),
+                          SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedGender,
+                            items: genderList
+                                .map(
+                                  (g) => DropdownMenuItem(
+                                    value: g,
+                                    child: Text(g),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) =>
+                                setState(() => selectedGender = val),
+                            decoration: _inputDecoration("Pilih "),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 16),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Pilih Batch", style: TextStyle(fontSize: 16)),
+                          SizedBox(height: 8),
+                          DropdownButtonFormField<Batches>(
+                            initialValue: selectedBatch,
+                            items: batchList
+                                .map(
+                                  (b) => DropdownMenuItem(
+                                    value: b,
+                                    child: Text(b.batchKe ?? "Batch ${b.id}"),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) =>
+                                setState(() => selectedBatch = val),
+                            decoration: _inputDecoration("Pilih Batch"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 16),
+
+                Text("Pilih Pelatihan", style: TextStyle(fontSize: 16)),
+
+                SizedBox(height: 10),
+                DropdownButtonFormField<Datum>(
+                  initialValue: selectedTraining,
+                  items: trainingList
+                      .map(
+                        (t) => DropdownMenuItem(
+                          value: t,
+                          child: SizedBox(
+                            width: 220,
+                            child: Text(
+                              t.title ?? "Pelatihan ${t.id}",
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => selectedTraining = val),
+                  decoration: _inputDecoration("Pilih Pelatihan"),
+                ),
+                SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: isLoading ? null : registerUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xff8A2D3B),
+                    minimumSize: Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        )
+                      : Text(
+                          "Buat Akun",
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                ),
+                SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Sudah punya akun? ",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400,
+                      ),
+
+                      children: [
+                        TextSpan(
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              context.push(Login());
+                            },
+                          text: " Masuk",
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: const Color.fromARGB(255, 11, 39, 164),
+                            // fontFamily: "StageGrotesk_Bold",
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

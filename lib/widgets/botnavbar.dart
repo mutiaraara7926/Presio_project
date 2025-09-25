@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 class Botnavbar extends StatefulWidget {
   const Botnavbar({super.key});
+  static const id = "/BotNav";
 
   @override
   State<Botnavbar> createState() => _BotnavbarState();
